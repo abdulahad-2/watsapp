@@ -169,14 +169,14 @@ Passionate about crafting digital experiences and turning ideas into reality. Sp
 
 ### 🔗 Connect with me:
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://abdulahad-2.github.io/)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/abdul-ahad-dev)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://ahad-dev.vercel.app/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/abdul-ahad-7908a82b4)
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/abdulahad-2)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:ahaddev.contact@gmail.com)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:abdul.ahadt732@gmail.com)
 
 ### 📞 Contact Information:
-- **Email:** ahaddev.contact@gmail.com
-- **Phone:** +92 XXX XXXXXXX
+- **Email:** abdul.ahadt732@gmail.com
+- **Phone:** +923259684493
 - **Location:** Pakistan
 
 ---
