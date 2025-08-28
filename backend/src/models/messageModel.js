@@ -17,6 +17,14 @@ const messageSchema = mongoose.Schema(
       ref: "ConversationModel",
     },
     files: [],
+    starred: {
+      type: Boolean,
+      default: false,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     collection: "messages",

@@ -25,14 +25,14 @@ export default function ChatMessages({ typing }) {
         {/*Messages*/}
         {messages &&
           messages.map((message) => (
-            <>
+            <div key={message._id}>
               {/*Message files */}
               {message.files.length > 0
-                ? message.files.map((file) => (
+                ? message.files.map((file, index) => (
                     <FileMessage
                       FileMessage={file}
                       message={message}
-                      key={message._id}
+                      key={`${message._id}-file-${index}`}
                       me={user._id === message.sender._id}
                     />
                   ))
@@ -41,13 +41,12 @@ export default function ChatMessages({ typing }) {
               {message.message.length > 0 ? (
                 <Message
                   message={message}
-                  key={message._id}
-                  me={user._id === message.sender._id}
+                  me={user._id === message.sender?._id}
                 />
               ) : null}
-            </>
+            </div>
           ))}
-        {typing === activeConversation._id ? <Typing /> : null}
+        {typing === activeConversation?._id ? <Typing /> : null}
         <div className="mt-2" ref={endRef}></div>
       </div>
     </div>

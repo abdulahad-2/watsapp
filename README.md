@@ -45,11 +45,11 @@ Before you begin, ensure you have met the following requirements:
     ```
 3. Install server dependencies and start server:
    ```
-   cd backend && yarn && yarn dev
+   cd backend && npm install && npm run dev
    ```
 4.  Install client dependencies and start server:
     ```
-    cd frontend && yarn && yarn start
+    cd frontend && npm install && npm start
     ```
 5. Copy your environment variables in both frontend and backend in new .env file same as .env.example
    

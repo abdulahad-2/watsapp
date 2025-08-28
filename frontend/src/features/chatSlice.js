@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const CONVERSATION_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"}/api/v1/conversation`;
-const MESSAGE_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"}/api/v1/message`;
+const CONVERSATION_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/conversation`;
+const MESSAGE_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/message`;
 
 const initialState = {
   status: "",
@@ -33,11 +33,11 @@ export const getConversations = createAsyncThunk(
 export const open_create_conversation = createAsyncThunk(
   "conervsation/open_create",
   async (values, { rejectWithValue }) => {
-    const { token, receiver_id, isGroup } = values;
+    const { token, receiver_id, isGroup, convo_id } = values;
     try {
       const { data } = await axios.post(
         CONVERSATION_ENDPOINT,
-        { receiver_id, isGroup },
+        { receiver_id, isGroup, convo_id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -110,6 +110,48 @@ export const createGroupConversation = createAsyncThunk(
     }
   }
 );
+
+export const deleteMessage = createAsyncThunk(
+  "message/delete",
+  async (values, { rejectWithValue }) => {
+    const { token, messageId, convo_id } = values;
+    try {
+      await axios.delete(
+        `${MESSAGE_ENDPOINT}/${messageId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          data: { convo_id }
+        }
+      );
+      return { messageId, convo_id };
+    } catch (error) {
+      return rejectWithValue(error.response.data.error.message);
+    }
+  }
+);
+
+export const starMessage = createAsyncThunk(
+  "message/star",
+  async (values, { rejectWithValue }) => {
+    const { token, messageId } = values;
+    try {
+      const { data } = await axios.patch(
+        `${MESSAGE_ENDPOINT}/${messageId}/star`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.error.message);
+    }
+  }
+);
 export const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -145,6 +187,17 @@ export const chatSlice = createSlice({
       let files = [...state.files];
       let fileToRemove = [files[index]];
       state.files = files.filter((file) => !fileToRemove.includes(file));
+    },
+    removeMessage: (state, action) => {
+      const { messageId, convo_id } = action.payload;
+      state.messages = state.messages.filter(msg => msg._id !== messageId);
+      
+      // Update conversation's latest message if needed
+      let conversation = state.conversations.find(c => c._id === convo_id);
+      if (conversation && conversation.latestMessage?._id === messageId) {
+        const remainingMessages = state.messages.filter(msg => msg.conversation._id === convo_id);
+        conversation.latestMessage = remainingMessages[remainingMessages.length - 1] || null;
+      }
     },
   },
   extraReducers(builder) {
@@ -203,6 +256,37 @@ export const chatSlice = createSlice({
       .addCase(sendMessage.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+      .addCase(deleteMessage.pending, (state, action) => {
+        state.status = "loading";
+      })
+      .addCase(deleteMessage.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const { messageId } = action.payload;
+        state.messages = state.messages.filter(msg => msg._id !== messageId);
+      })
+      .addCase(deleteMessage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(starMessage.pending, (state, action) => {
+        state.status = "loading";
+      })
+      .addCase(starMessage.fulfilled, (state, action) => {
+        const { convo_id, messageId, isStarred } = action.payload;
+        const conversation = state.conversations.find(
+          (c) => c._id === convo_id
+        );
+        if (conversation) {
+          const message = conversation.messages.find((m) => m._id === messageId);
+          if (message) {
+            message.starred = isStarred;
+          }
+        }
+      })
+      .addCase(starMessage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });
@@ -212,6 +296,7 @@ export const {
   addFiles,
   clearFiles,
   removeFileFromFiles,
+  removeMessage,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

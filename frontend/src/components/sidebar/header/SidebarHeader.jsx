@@ -3,10 +3,18 @@ import { ChatIcon, CommunityIcon, DotsIcon, StoryIcon } from "../../../svg";
 import { useState } from "react";
 import Menu from "./Menu";
 import { CreateGroup } from "./createGroup";
+import ProfileEdit from "../../profile/ProfileEdit";
+import NewCommunity from "../../community/NewCommunity";
+import Stories from "../../stories/Stories";
+import NewChat from "../../Chat/NewChat";
 export default function SidebarHeader() {
   const { user } = useSelector((state) => state.user);
   const [showMenu, setShowMenu] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [showNewCommunity, setShowNewCommunity] = useState(false);
+  const [showStories, setShowStories] = useState(false);
+  const [showNewChat, setShowNewChat] = useState(false);
   return (
     <>
       {/*Sidebar header*/}
@@ -14,7 +22,7 @@ export default function SidebarHeader() {
         {/* container */}
         <div className="w-full flex items-center justify-between">
           {/*user image*/}
-          <button className="btn" onClick={() => alert("Profile editing feature coming soon!")}>
+          <button className="btn" onClick={() => setShowProfileEdit(true)}>
             <img
               src={user.picture}
               alt={user.name}
@@ -24,17 +32,17 @@ export default function SidebarHeader() {
           {/*user icons*/}
           <ul className="flex items-center gap-x-2 5">
             <li>
-              <button className="btn" onClick={() => alert("Community feature coming soon!")}>
+              <button className="btn" onClick={() => setShowNewCommunity(true)}>
                 <CommunityIcon className="dark:fill-dark_svg_1" />
               </button>
             </li>
             <li>
-              <button className="btn" onClick={() => alert("Stories feature coming soon!")}>
+              <button className="btn" onClick={() => setShowStories(true)}>
                 <StoryIcon className="dark:fill-dark_svg_1" />
               </button>
             </li>
             <li>
-              <button className="btn" onClick={() => alert("New chat feature coming soon!")}>
+              <button className="btn" onClick={() => setShowNewChat(true)}>
                 <ChatIcon className="dark:fill-dark_svg_1" />
               </button>
             </li>
@@ -55,6 +63,22 @@ export default function SidebarHeader() {
       {/*Create Group*/}
       {showCreateGroup && (
         <CreateGroup setShowCreateGroup={setShowCreateGroup} />
+      )}
+      {/*Profile Edit*/}
+      {showProfileEdit && (
+        <ProfileEdit setShowProfileEdit={setShowProfileEdit} />
+      )}
+      {/*New Community*/}
+      {showNewCommunity && (
+        <NewCommunity setShowNewCommunity={setShowNewCommunity} />
+      )}
+      {/*Stories*/}
+      {showStories && (
+        <Stories setShowStories={setShowStories} />
+      )}
+      {/*New Chat*/}
+      {showNewChat && (
+        <NewChat setShowNewChat={setShowNewChat} />
       )}
     </>
   );

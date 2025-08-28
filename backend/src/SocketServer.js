@@ -27,8 +27,10 @@ export default function (socket, io) {
   //send and receive message
   socket.on("send message", (message) => {
     let conversation = message.conversation;
-    if (!conversation.users) return;
+    if (!conversation || !conversation.users || !Array.isArray(conversation.users)) return;
+    
     conversation.users.forEach((user) => {
+      if (!user || !user._id || !message.sender || !message.sender._id) return;
       if (user._id === message.sender._id) return;
       socket.in(user._id).emit("receive message", message);
     });
@@ -62,5 +64,11 @@ export default function (socket, io) {
   //---end call
   socket.on("end call", (id) => {
     io.to(id).emit("end call");
+  });
+
+  //message deletion
+  socket.on("message deleted", (data) => {
+    const { messageId, conversationId } = data;
+    socket.in(conversationId).emit("message deleted", { messageId, conversationId });
   });
 }

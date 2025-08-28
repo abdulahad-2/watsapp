@@ -12,8 +12,9 @@ import SocketContext from "./context/SocketContext";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Register from "./pages/register";
+import TestConnection from "./pages/TestConnection";
 //socket io
-const socket = io(process.env.REACT_APP_API_ENDPOINT ? process.env.REACT_APP_API_ENDPOINT.split("/api/v1")[0] : "http://localhost:8000");
+const socket = io(process.env.REACT_APP_API_ENDPOINT ? process.env.REACT_APP_API_ENDPOINT.split("/api/v1")[0] : "http://localhost:5000");
 
 function App() {
   //const [connected, setConnected] = useState(false);
@@ -42,6 +43,11 @@ function App() {
               exact
               path="/register"
               element={!token ? <Register /> : <Navigate to="/" />}
+            />
+            <Route
+              exact
+              path="/test-connection"
+              element={<TestConnection />}
             />
           </Routes>
         </Router>

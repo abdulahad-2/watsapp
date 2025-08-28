@@ -19,7 +19,14 @@ export const doesConversationExist = async (sender_id, receiver_id) => {
     select: "name email picture status",
   });
 
-  return convos[0];
+  // Ensure conversation has both users before returning
+  const existingConvo = convos[0];
+  if (existingConvo && existingConvo.users.length < 2) {
+    console.log(`Warning: Found conversation ${existingConvo._id} with only ${existingConvo.users.length} users`);
+    return null; // Force recreation
+  }
+
+  return existingConvo;
 };
 
 export const createConversation = async (data) => {
@@ -55,6 +62,11 @@ export const getUserConversations = async (user_id) => {
       results = await UserModel.populate(results, {
         path: "latestMessage.sender",
         select: "name email picture status",
+      });
+      // Debug: Check if users are properly populated
+      results.forEach(convo => {
+        console.log(`Conversation ${convo._id} has ${convo.users?.length || 0} users:`, 
+          convo.users?.map(u => u._id) || 'No users');
       });
       conversations = results;
     })

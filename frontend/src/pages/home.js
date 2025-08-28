@@ -7,6 +7,7 @@ import SocketContext from "../context/SocketContext";
 import {
   getConversations,
   updateMessagesAndConversations,
+  removeMessage,
 } from "../features/chatSlice";
 import Call from "../components/Chat/call/Call";
 import {
@@ -46,13 +47,13 @@ function Home({ socket }) {
     socket.on("get-online-users", (users) => {
       setOnlineUsers(users);
     });
-  }, [user]);
+  }, [user, socket]);
 
   //call
   useEffect(() => {
     setupMedia();
     socket.on("setup socket", (id) => {
-      setCall({ ...call, socketId: id });
+      setCall(prevCall => ({ ...prevCall, socketId: id }));
     });
     socket.on("call user", (data) => {
       setCall({
@@ -72,7 +73,7 @@ function Home({ socket }) {
         connectionRef?.current?.destroy();
       }
     });
-  }, []);
+  }, [call, callAccepted, socket]);
   //--call user funcion
   const callUser = () => {
     enableMedia();
@@ -136,6 +137,21 @@ function Home({ socket }) {
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setStream(stream);
+        if (myVideo.current) {
+          myVideo.current.srcObject = stream;
+        }
+      })
+      .catch((error) => {
+        // Silently handle media access denial - don't log errors
+        // Try audio only
+        navigator.mediaDevices
+          .getUserMedia({ video: false, audio: true })
+          .then((audioStream) => {
+            setStream(audioStream);
+          })
+          .catch((audioError) => {
+            // Continue without any media - this is normal for many users
+          });
       });
   };
 
@@ -148,7 +164,7 @@ function Home({ socket }) {
     if (user?.token) {
       dispatch(getConversations(user.token));
     }
-  }, [user]);
+  }, [user, dispatch]);
   useEffect(() => {
     //lsitening to receiving a message
     socket.on("receive message", (message) => {
@@ -157,7 +173,11 @@ function Home({ socket }) {
     //listening when a user is typing
     socket.on("typing", (conversation) => setTyping(conversation));
     socket.on("stop typing", () => setTyping(false));
-  }, []);
+    //listening for message deletion
+    socket.on("message deleted", ({ messageId, conversationId }) => {
+      dispatch(removeMessage({ messageId, convo_id: conversationId }));
+    });
+  }, [dispatch, socket]);
   return (
     <>
       <div className="h-screen dark:bg-dark_bg_1 flex items-center justify-center overflow-hidden">

@@ -5,7 +5,7 @@ import logger from "./configs/logger.config.js";
 import SocketServer from "./SocketServer.js";
 //env variables
 const { DATABASE_URL } = process.env;
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5000;
 
 //exit on mognodb error
 mongoose.connection.on("error", (err) => {

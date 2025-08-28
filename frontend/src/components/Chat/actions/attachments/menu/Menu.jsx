@@ -1,12 +1,12 @@
 import {
   CameraIcon,
-  ContactIcon,
-  DocumentIcon,
-  PollIcon,
   StickerIcon,
+  PollIcon,
+  ContactIcon
 } from "../../../../../svg";
 import DocumentAttachment from "./DocumentAttachment";
 import PhotoAttachment from "./PhotoAttachment";
+import VideoAttachment from "./VideoAttachment";
 
 export default function Menu() {
   return (
@@ -22,6 +22,7 @@ export default function Menu() {
         </button>
       </li>
       <DocumentAttachment />
+      <VideoAttachment />
       <li>
         <button type="button" className="bg-[#D3396D] rounded-full">
           <CameraIcon />

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { FilterIcon, ReturnIcon, SearchIcon } from "../../../svg";
 
@@ -7,23 +7,37 @@ export default function Search({ searchLength, setSearchResults }) {
   const { user } = useSelector((state) => state.user);
   const { token } = user;
   const [show, setShow] = useState(false);
-  const handleSearch = async (e) => {
-    if (e.target.value && e.key === "Enter") {
+  
+  const handleSearch = useCallback(async (searchTerm) => {
+    if (searchTerm && searchTerm.trim().length > 0) {
       try {
         const { data } = await axios.get(
-          `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"}/api/v1/user?search=${e.target.value}`,
+          `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/user?search=${searchTerm}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
+        console.log("Search results:", data); // Debug log
         setSearchResults(data);
       } catch (error) {
-        console.log(error.response.data.error.message);
+        console.log("Search error:", error.response?.data?.error?.message || error.message);
+        setSearchResults([]);
       }
     } else {
       setSearchResults([]);
+    }
+  }, [token, setSearchResults]);
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    handleSearch(value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch(e.target.value);
     }
   };
   return (
@@ -50,8 +64,9 @@ export default function Search({ searchLength, setSearchResults }) {
               placeholder="Search or start a new chat"
               className="input"
               onFocus={() => setShow(true)}
-              onBlur={() => searchLength == 0 && setShow(false)}
-              onKeyDown={(e) => handleSearch(e)}
+              onBlur={() => searchLength === 0 && setShow(false)}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
             />
           </div>
           <button className="btn">

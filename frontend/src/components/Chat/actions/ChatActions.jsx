@@ -33,9 +33,12 @@ function ChatActions({ socket }) {
     setLoading(true);
     try {
       let newMsg = await dispatch(sendMessage(values));
-      if (newMsg.payload) {
+      if (newMsg.payload && newMsg.meta.requestStatus === 'fulfilled') {
         socket.emit("send message", newMsg.payload);
         setMessage("");
+      } else {
+        console.error("Message sending failed:", newMsg);
+        alert("Failed to send message. Please check your connection.");
       }
     } catch (error) {
       console.error("Failed to send message:", error);
