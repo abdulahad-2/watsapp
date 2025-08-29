@@ -1,74 +1,89 @@
-let onlineUsers = [];
+let onlineUsers = []; // in-memory store for connected users
+
 export default function (socket, io) {
-  //user joins or opens the application
-  socket.on("join", (user) => {
-    socket.join(user);
-    //add joined user to online users
-    if (!onlineUsers.some((u) => u.userId === user)) {
-      onlineUsers.push({ userId: user, socketId: socket.id });
+  // ✅ user joins app (login ke baad frontend se emit hoga)
+  socket.on("join", (userId) => {
+    if (!userId) return;
+
+    socket.join(userId); // user ke liye ek private room
+    // agar user already online list me nahi hai to push karo
+    if (!onlineUsers.some((u) => u.userId === userId)) {
+      onlineUsers.push({ userId, socketId: socket.id });
     }
-    //send online users to frontend
+
+    // send updated online users list
     io.emit("get-online-users", onlineUsers);
-    //send socket id
-    io.emit("setup socket", socket.id);
+
+    // send socket id back to frontend
+    socket.emit("setup socket", socket.id);
   });
 
-  //socket disconnect
+  // ✅ socket disconnect
   socket.on("disconnect", () => {
     onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
     io.emit("get-online-users", onlineUsers);
   });
 
-  //join a conversation room
-  socket.on("join conversation", (conversation) => {
-    socket.join(conversation);
+  // ✅ join conversation room
+  socket.on("join conversation", (conversationId) => {
+    if (conversationId) socket.join(conversationId);
   });
 
-  //send and receive message
+  // ✅ send and receive message
   socket.on("send message", (message) => {
-    let conversation = message.conversation;
-    if (!conversation || !conversation.users || !Array.isArray(conversation.users)) return;
-    
+    if (!message || !message.conversation || !Array.isArray(message.conversation.users)) return;
+
+    const { conversation, sender } = message;
+    if (!sender || !sender._id) return;
+
     conversation.users.forEach((user) => {
-      if (!user || !user._id || !message.sender || !message.sender._id) return;
-      if (user._id === message.sender._id) return;
+      if (!user || !user._id) return;
+      if (user._id === sender._id) return; // don't send to self
+
       socket.in(user._id).emit("receive message", message);
     });
   });
 
-  //typing
-  socket.on("typing", (conversation) => {
-    socket.in(conversation).emit("typing", conversation);
-  });
-  socket.on("stop typing", (conversation) => {
-    socket.in(conversation).emit("stop typing");
+  // ✅ typing indicators
+  socket.on("typing", (conversationId) => {
+    if (conversationId) socket.in(conversationId).emit("typing", conversationId);
   });
 
-  //call
-  //---call user
+  socket.on("stop typing", (conversationId) => {
+    if (conversationId) socket.in(conversationId).emit("stop typing", conversationId);
+  });
+
+  // ✅ calling system
+  // --- call user
   socket.on("call user", (data) => {
     let userId = data.userToCall;
-    let userSocketId = onlineUsers.find((user) => user.userId == userId);
-    io.to(userSocketId.socketId).emit("call user", {
-      signal: data.signal,
-      from: data.from,
-      name: data.name,
-      picture: data.picture,
-    });
+    let userSocket = onlineUsers.find((user) => user.userId == userId);
+
+    if (userSocket) {
+      io.to(userSocket.socketId).emit("call user", {
+        signal: data.signal,
+        from: data.from,
+        name: data.name,
+        picture: data.picture,
+      });
+    }
   });
-  //---answer call
+
+  // --- answer call
   socket.on("answer call", (data) => {
-    io.to(data.to).emit("call accepted", data.signal);
+    if (data?.to) io.to(data.to).emit("call accepted", data.signal);
   });
 
-  //---end call
+  // --- end call
   socket.on("end call", (id) => {
-    io.to(id).emit("end call");
+    if (id) io.to(id).emit("end call");
   });
 
-  //message deletion
+  // ✅ message deletion
   socket.on("message deleted", (data) => {
     const { messageId, conversationId } = data;
-    socket.in(conversationId).emit("message deleted", { messageId, conversationId });
+    if (messageId && conversationId) {
+      socket.in(conversationId).emit("message deleted", { messageId, conversationId });
+    }
   });
 }

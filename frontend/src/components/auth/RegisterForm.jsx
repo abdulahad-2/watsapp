@@ -32,23 +32,19 @@ export default function RegisterForm() {
 
   const onSubmit = async (data) => {
     dispatch(changeStatus("loading"));
-    if (picture) {
-      // upload to cloudinary and then register user
-      await uploadImage().then(async (response) => {
-        let res = await dispatch(
-          registerUser({ ...data, picture: response.secure_url })
-        );
-        if (res?.payload?.user) {
-          navigate("/");
-        }
-      });
-    } else {
-      let res = await dispatch(registerUser({ ...data, picture: "" }));
-      if (res?.payload?.user) {
-        navigate("/");
+    try {
+      let imageUrl = "";
+      if (picture) {
+        const response = await uploadImage();
+        imageUrl = response.secure_url;
       }
+      let res = await dispatch(registerUser({ ...data, picture: imageUrl }));
+      if (res?.payload?.user) navigate("/");
+    } catch (err) {
+      console.error("Upload failed:", err);
     }
   };
+  
 
   const uploadImage = async () => {
     let formData = new FormData();
@@ -90,12 +86,13 @@ export default function RegisterForm() {
             error={errors?.email?.message}
           />
           <AuthInput
-            name="status"
-            type="text"
-            placeholder="Status (Optional)"
-            register={register}
-            error={errors?.status?.message}
-          />
+  name="about"
+  type="text"
+  placeholder="Status (Optional)"
+  register={register}
+  error={errors?.about?.message}
+/>
+
           <AuthInput
             name="password"
             type="password"
