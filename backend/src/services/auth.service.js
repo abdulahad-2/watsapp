@@ -3,7 +3,12 @@ import validator from "validator";
 import { createClient } from '@supabase/supabase-js';
 
 //env variables
-const { DEFAULT_PICTURE, DEFAULT_STATUS, SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env;
+const { DEFAULT_PICTURE, DEFAULT_STATUS, SUPABASE_URL } = process.env;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  throw new Error('Missing Supabase configuration: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY/SUPABASE_SERVICE_KEY');
+}
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
