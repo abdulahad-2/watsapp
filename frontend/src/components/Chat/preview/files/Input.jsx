@@ -1,3 +1,4 @@
+import React from 'react';
 export default function Input({ message, setMessage }) {
   return (
     <div className="w-full max-w-[60%] dark:bg-dark_hover_1 rounded-lg">

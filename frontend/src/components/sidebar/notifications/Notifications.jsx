@@ -1,3 +1,4 @@
+import React from 'react';
 import { ArrowIcon, CloseIcon, NotificationIcon } from "../../../svg";
 
 export default function Notifications() {

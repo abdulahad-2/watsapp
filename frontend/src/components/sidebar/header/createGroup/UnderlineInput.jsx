@@ -1,3 +1,4 @@
+import React from 'react';
 export default function UnderlineInput({ name, setName }) {
   return (
     <div className="mt-4">

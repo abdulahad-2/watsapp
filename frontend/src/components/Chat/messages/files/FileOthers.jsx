@@ -1,3 +1,4 @@
+import React from 'react';
 import DownloadIcon from "../../../../svg/Download";
 export default function FileOthers({ file, type, me }) {
   return (

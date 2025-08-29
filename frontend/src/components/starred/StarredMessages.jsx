@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { ReturnIcon } from "../../svg";
+import React from 'react';
 
 export default function StarredMessages({ setShowStarredMessages }) {
   const { user } = useSelector((state) => state.user);

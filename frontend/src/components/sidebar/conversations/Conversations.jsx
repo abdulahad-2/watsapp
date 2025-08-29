@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { checkOnlineStatus, getConversationId } from "../../../utils/chat";
 import Conversation from "./Conversation";
+import React from 'react';
 
 export default function Conversations({ onlineUsers, typing }) {
   const { conversations, activeConversation } = useSelector(

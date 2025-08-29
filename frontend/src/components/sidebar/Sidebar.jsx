@@ -4,6 +4,7 @@ import { SidebarHeader } from "./header";
 import { Notifications } from "./notifications";
 import { Search } from "./search";
 import { SearchResults } from "./search";
+import React from 'react';
 
 export default function Sidebar({ onlineUsers, typing }) {
   const [searchResults, setSearchResults] = useState([]);

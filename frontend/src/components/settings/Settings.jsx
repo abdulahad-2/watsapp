@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReturnIcon } from "../../svg";
+import React from 'react';
 
 export default function Settings({ setShowSettings }) {
   const { user } = useSelector((state) => state.user);

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from "react";
 import { CloseIcon, ValidIcon } from "../../../svg";
 export default function Ringing({ call, setCall, answerCall, endCall }) {

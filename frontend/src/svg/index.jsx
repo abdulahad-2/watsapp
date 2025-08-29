@@ -1,3 +1,4 @@
+import React from 'react';
 import CommunityIcon from "./Community.jsx";
 import StoryIcon from "./Story.jsx";
 import ChatIcon from "./Chat.jsx";

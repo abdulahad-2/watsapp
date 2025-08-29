@@ -1,3 +1,4 @@
+import React from 'react';
 import { capitalize } from "../../../utils/string";
 import CallTimes from "./CallTimes";
 

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { addFiles } from "../../../../../features/chatSlice";

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef } from "react";
 import { CloseIcon } from "../../../../svg";
 import { useDispatch } from "react-redux";

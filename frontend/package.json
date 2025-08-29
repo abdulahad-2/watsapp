@@ -34,14 +34,16 @@
     "yup": "^1.0.2"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "vite",
-    "normalize:icons": "node scripts/normalize-icons.js",
-    "fix:svg": "node scripts/fix-jsx-svg.js",
-    "svgr:icons": "npx @svgr/cli --icon --typescript=false --replace-attr-values \"#000=currentColor\" --ext js --out-dir src/svg assets/svg"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "start": "vite",
+  "normalize:icons": "node scripts/normalize-icons.js",
+  "fix:svg": "node scripts/fix-jsx-svg.js",
+  "svgr:icons": "npx @svgr/cli --icon --typescript=false --replace-attr-values \"#000=currentColor\" --ext js --out-dir src/svg assets/svg",
+  "fix:react-imports": "node scripts/fix-react-imports.js",
+  "icons:all": "npm run svgr:icons && npm run fix:react-imports"
+},
   "eslintConfig": {
     "extends": [
       "react-app",

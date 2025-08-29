@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from "react";
 import FileViewer from "./FileViewer";
 import HandleAndSend from "./HandleAndSend";

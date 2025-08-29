@@ -8,6 +8,7 @@ import {
 } from "../../../utils/chat";
 import { dateHandler } from "../../../utils/date";
 import { capitalize } from "../../../utils/string";
+import React from 'react';
 
 function Conversation({ convo, socket, online, typing }) {
   const dispatch = useDispatch();

@@ -1,3 +1,4 @@
+import React from 'react';
 import { AddContactIcon, ArrowIcon, LockIcon } from "../../../svg";
 
 export default function Header() {

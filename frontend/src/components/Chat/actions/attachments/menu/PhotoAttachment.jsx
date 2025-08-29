@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef } from "react";
 import { PhotoIcon } from "../../../../../svg";
 import { useDispatch } from "react-redux";

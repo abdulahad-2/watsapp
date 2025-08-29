@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef } from "react";
 import { DocumentIcon } from "../../../../../svg";
 import { addFiles } from "../../../../../features/chatSlice";

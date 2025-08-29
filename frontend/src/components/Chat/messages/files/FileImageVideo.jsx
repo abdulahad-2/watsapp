@@ -1,3 +1,4 @@
+import React from 'react';
 export default function FileImageVideo({ url, type }) {
   return (
     <div className="z-20">

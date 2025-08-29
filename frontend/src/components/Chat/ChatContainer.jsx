@@ -6,6 +6,7 @@ import { ChatActions } from "./actions";
 import ChatHeader from "./header/ChatHeader";
 import ChatMessages from "./messages/ChatMessages";
 import FilesPreview from "./preview/files/FilesPreview";
+import React from 'react';
 
 export default function ChatContainer({ onlineUsers, typing, callUser }) {
   const dispatch = useDispatch();

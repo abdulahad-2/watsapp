@@ -1,3 +1,4 @@
+import React from 'react';
 import { useSelector } from "react-redux";
 import { ChatIcon, CommunityIcon, DotsIcon, StoryIcon } from "../../../svg";
 import { useState } from "react";

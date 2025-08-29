@@ -1,3 +1,4 @@
+import React from 'react';
 import moment from "moment";
 import TraingleIcon from "../../../../svg/triangle";
 import FileImageVideo from "./FileImageVideo";

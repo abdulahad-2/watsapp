@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import React from 'react';
 
 export default function TestConnection() {
   const [loading, setLoading] = useState(true);

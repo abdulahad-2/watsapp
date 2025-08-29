@@ -1,4 +1,5 @@
 import { Logo } from "../../../svg";
+import React from 'react';
 
 export default function WhatsappHome() {
   return (

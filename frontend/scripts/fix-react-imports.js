@@ -1,31 +1,41 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const svgDir = path.join(__dirname, '..', 'src', 'svg');
+const rootDir = path.join(__dirname, "..", "src"); // full frontend/src folder
+
+function walkDir(dir, callback) {
+  fs.readdirSync(dir).forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat.isDirectory()) {
+      walkDir(filePath, callback);
+    } else {
+      callback(filePath);
+    }
+  });
+}
 
 function fixReactImports() {
-  const files = fs.readdirSync(svgDir).filter(f => f.endsWith('.js'));
   let fixedCount = 0;
-  
-  console.log('Checking React imports in SVG files...');
-  
-  files.forEach(file => {
-    const filePath = path.join(svgDir, file);
-    let content = fs.readFileSync(filePath, 'utf8');
-    
-    // Check if file uses React.createElement
-    if (content.includes('React.createElement')) {
-      // Check if React is imported
-      if (!content.includes('import React from')) {
-        console.log(`Adding React import to ${file}`);
+  console.log("🔍 Scanning for JSX files...");
+
+  walkDir(rootDir, (filePath) => {
+    if (filePath.endsWith(".jsx")) {
+      let content = fs.readFileSync(filePath, "utf8");
+
+      // check if React import missing
+      if (!content.includes("import React")) {
+        console.log(`⚡ Adding React import to: ${path.relative(rootDir, filePath)}`);
         content = `import React from 'react';\n${content}`;
-        fs.writeFileSync(filePath, content, 'utf8');
+        fs.writeFileSync(filePath, content, "utf8");
         fixedCount++;
+      } else {
+        console.log(`⏭️ Skipped (already has React): ${path.relative(rootDir, filePath)}`);
       }
     }
   });
-  
-  console.log(`Fixed React imports in ${fixedCount} files.`);
+
+  console.log(`\n✅ Done! Fixed React imports in ${fixedCount} files.`);
 }
 
 if (require.main === module) {

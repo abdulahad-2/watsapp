@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { ReturnIcon, ValidIcon } from "../../svg";
 import { ClipLoader } from "react-spinners";
+import React from 'react';
 
 export default function NewCommunity({ setShowNewCommunity }) {
   const { user } = useSelector((state) => state.user);

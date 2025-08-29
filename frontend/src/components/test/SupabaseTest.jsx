@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-
+import React from 'react';
 const SupabaseTest = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
