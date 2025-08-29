@@ -7,16 +7,26 @@ import {
   VideoCallIcon,
 } from "../../../svg";
 import { capitalize } from "../../../utils/string";
-import { useEffect, useRef, useState } from "react";
 import SocketContext from "../../../context/SocketContext";
-import Peer from "simple-peer";
 import {
   getConversationName,
   getConversationPicture,
 } from "../../../utils/chat";
+
 function ChatHeader({ online, callUser, socket }) {
-  const { activeConversation } = useSelector((state) => state.chat);
-  const { user } = useSelector((state) => state.user);
+  // Redux selectors
+  const { activeConversation } = useSelector((state) => state.chat) || {};
+  const { user } = useSelector((state) => state.user) || {};
+
+  // Safe guards
+  const isGroup = activeConversation?.isGroup || false;
+  const users = activeConversation?.users || [];
+  const conversationPicture = isGroup
+    ? activeConversation?.picture
+    : getConversationPicture(user, users);
+  const conversationName = isGroup
+    ? activeConversation?.name
+    : capitalize(getConversationName(user, users).split(" ")[0]);
 
   return (
     <div className="h-[59px] dark:bg-dark_bg_2 flex items-center p16 select-none">
@@ -27,26 +37,14 @@ function ChatHeader({ online, callUser, socket }) {
           {/*Conversation image*/}
           <button className="btn">
             <img
-              src={
-                activeConversation.isGroup
-                  ? activeConversation.picture
-                  : getConversationPicture(user, activeConversation.users)
-              }
+              src={conversationPicture}
               alt=""
               className="w-full h-full rounded-full object-cover"
             />
           </button>
           {/*Conversation name and online status*/}
           <div className="flex flex-col">
-            <h1 className="dark:text-white text-md font-bold">
-              {activeConversation.isGroup
-                ? activeConversation.name
-                : capitalize(
-                    getConversationName(user, activeConversation.users).split(
-                      " "
-                    )[0]
-                  )}
-            </h1>
+            <h1 className="dark:text-white text-md font-bold">{conversationName}</h1>
             <span className="text-xs dark:text-dark_svg_2">
               {online ? "online" : ""}
             </span>
@@ -54,25 +52,25 @@ function ChatHeader({ online, callUser, socket }) {
         </div>
         {/*Right*/}
         <ul className="flex items-center gap-x-2.5">
-          {1 == 1 ? (
-            <li onClick={() => callUser()}>
-              <button className="btn">
-                <VideoCallIcon />
-              </button>
-            </li>
-          ) : null}
-          {1 == 1 ? (
-            <li>
-              <button className="btn" onClick={() => alert("Voice call feature coming soon!")}>
-                <CallIcon />
-              </button>
-            </li>
-          ) : null}
+          {/* Video call */}
+          <li onClick={() => callUser?.()}>
+            <button className="btn">
+              <VideoCallIcon />
+            </button>
+          </li>
+          {/* Voice call */}
+          <li>
+            <button className="btn" onClick={() => alert("Voice call feature coming soon!")}>
+              <CallIcon />
+            </button>
+          </li>
+          {/* Search in chat */}
           <li>
             <button className="btn" onClick={() => alert("Search in chat feature coming soon!")}>
               <SearchLargeIcon className="dark:fill-dark_svg_1" />
             </button>
           </li>
+          {/* Chat options */}
           <li>
             <button className="btn" onClick={() => alert("Chat options menu coming soon!")}>
               <DotsIcon className="dark:fill-dark_svg_1" />
@@ -84,9 +82,11 @@ function ChatHeader({ online, callUser, socket }) {
   );
 }
 
+// Wrap component with SocketContext
 const ChatHeaderWithSocket = (props) => (
   <SocketContext.Consumer>
     {(socket) => <ChatHeader {...props} socket={socket} />}
   </SocketContext.Consumer>
 );
+
 export default ChatHeaderWithSocket;
