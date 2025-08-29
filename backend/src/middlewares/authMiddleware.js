@@ -1,7 +1,9 @@
+// backend/src/middleware/authMiddleware.js
 import createHttpError from "http-errors";
 import { createClient } from "@supabase/supabase-js";
 
-const { SUPABASE_URL } = process.env;
+// Supabase config
+const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
@@ -11,41 +13,29 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   );
 }
 
+// Create Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+// Middleware
 export default async function authMiddleware(req, res, next) {
   try {
-    // ✅ Debugging log: check headers
     console.log("REQ HEADERS:", req.headers);
 
-    // Optional chaining + existence check
     const authHeader = req.headers?.authorization;
-    if (!authHeader) {
-      console.warn("Authorization header missing");
-      return next(createHttpError.Unauthorized());
-    }
+    if (!authHeader) return next(createHttpError.Unauthorized("Authorization header missing"));
 
-    // Bearer token extraction
     const token = authHeader.split(" ")[1];
-    if (!token) {
-      console.warn("Bearer token missing in Authorization header");
-      return next(createHttpError.Unauthorized());
-    }
+    if (!token) return next(createHttpError.Unauthorized("Bearer token missing"));
 
-    // Supabase user validation
     const { data, error } = await supabase.auth.getUser(token);
     const user = data?.user;
 
-    if (error || !user) {
-      console.warn("Supabase auth failed or user not found", error);
-      return next(createHttpError.Unauthorized());
-    }
+    if (error || !user) return next(createHttpError.Unauthorized("Invalid token or user not found"));
 
-    // Attach user to request
     req.user = user;
     next();
   } catch (err) {
     console.error("Auth middleware unexpected error:", err);
-    return next(createHttpError.Unauthorized());
+    return next(createHttpError.Unauthorized("Unexpected auth error"));
   }
 }

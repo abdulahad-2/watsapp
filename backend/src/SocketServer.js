@@ -1,50 +1,46 @@
-let onlineUsers = []; // in-memory store for connected users
+// backend/src/socketServer.js
+let onlineUsers = []; // in-memory store
 
 export default function (socket, io) {
-  // ✅ user joins app (login ke baad frontend se emit hoga)
+  // User joins app
   socket.on("join", (userId) => {
     if (!userId) return;
 
-    socket.join(userId); // user ke liye ek private room
-    // agar user already online list me nahi hai to push karo
+    socket.join(userId); // private room for user
     if (!onlineUsers.some((u) => u.userId === userId)) {
       onlineUsers.push({ userId, socketId: socket.id });
     }
 
-    // send updated online users list
     io.emit("get-online-users", onlineUsers);
-
-    // send socket id back to frontend
     socket.emit("setup socket", socket.id);
   });
 
-  // ✅ socket disconnect
+  // Socket disconnect
   socket.on("disconnect", () => {
-    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+    onlineUsers = onlineUsers.filter((u) => u.socketId !== socket.id);
     io.emit("get-online-users", onlineUsers);
   });
 
-  // ✅ join conversation room
+  // Join conversation room
   socket.on("join conversation", (conversationId) => {
     if (conversationId) socket.join(conversationId);
   });
 
-  // ✅ send and receive message
+  // Send message
   socket.on("send message", (message) => {
-    if (!message || !message.conversation || !Array.isArray(message.conversation.users)) return;
+    if (!message?.conversation?.users || !Array.isArray(message.conversation.users)) return;
 
     const { conversation, sender } = message;
-    if (!sender || !sender._id) return;
+    if (!sender?._id) return;
 
     conversation.users.forEach((user) => {
-      if (!user || !user._id) return;
-      if (user._id === sender._id) return; // don't send to self
-
+      if (!user?._id) return;
+      if (user._id === sender._id) return; // skip self
       socket.in(user._id).emit("receive message", message);
     });
   });
 
-  // ✅ typing indicators
+  // Typing indicators
   socket.on("typing", (conversationId) => {
     if (conversationId) socket.in(conversationId).emit("typing", conversationId);
   });
@@ -53,12 +49,9 @@ export default function (socket, io) {
     if (conversationId) socket.in(conversationId).emit("stop typing", conversationId);
   });
 
-  // ✅ calling system
-  // --- call user
+  // Calling
   socket.on("call user", (data) => {
-    let userId = data.userToCall;
-    let userSocket = onlineUsers.find((user) => user.userId == userId);
-
+    const userSocket = onlineUsers.find((u) => u.userId === data.userToCall);
     if (userSocket) {
       io.to(userSocket.socketId).emit("call user", {
         signal: data.signal,
@@ -69,19 +62,16 @@ export default function (socket, io) {
     }
   });
 
-  // --- answer call
   socket.on("answer call", (data) => {
     if (data?.to) io.to(data.to).emit("call accepted", data.signal);
   });
 
-  // --- end call
   socket.on("end call", (id) => {
     if (id) io.to(id).emit("end call");
   });
 
-  // ✅ message deletion
-  socket.on("message deleted", (data) => {
-    const { messageId, conversationId } = data;
+  // Message deletion
+  socket.on("message deleted", ({ messageId, conversationId }) => {
     if (messageId && conversationId) {
       socket.in(conversationId).emit("message deleted", { messageId, conversationId });
     }
