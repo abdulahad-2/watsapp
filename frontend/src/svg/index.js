@@ -17,7 +17,7 @@ import SendIcon from "./Send";
 import PhotoIcon from "./Photo";
 import StickerIcon from "./Sticker";
 import CameraIcon from "./Camera";
-import DocumentIcon from "./Document";
+import DocumentIcon from "./Document.jsx";
 import ContactIcon from "./Contact";
 import PollIcon from "./Poll";
 import SmallArrowIcon from "./SmallArrow";

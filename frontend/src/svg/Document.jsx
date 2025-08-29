@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function DocumentIcon() {
   return (
     <svg
@@ -17,25 +19,12 @@ export default function DocumentIcon() {
       />
       <path
         d="M7.05 2C5.35 2 4 3.35 4 5.05v42.9C4 49.65 5.35 51 7.05 51h28.9C37.65 51 39 49.65 39 47.95V16.355H29.695c-2.25 0-4.05-1.8-4.05-4.05V2H7.05z"
-        fill="url(#paint0_linear_1141_21920)"
+        fill="#3762ea"
       />
       <path
         d="M18.5 42h-7c-.55 0-1-.45-1-1s.45-1 1-1h7c.55 0 1 .45 1 1s-.45 1-1 1zm13-6h-20c-.55 0-1-.45-1-1s.45-1 1-1h20c.55 0 1 .45 1 1s-.45 1-1 1zm0-6h-20c-.55 0-1-.45-1-1s.45-1 1-1h20c.55 0 1 .45 1 1s-.45 1-1 1zm0-6h-20c-.55 0-1-.45-1-1s.45-1 1-1h20c.55 0 1 .45 1 1s-.45 1-1 1z"
         fill="#fff"
       />
-      <defs>
-        <linearGradient
-          id="paint0_linear_1141_21920"
-          x1="21.5"
-          y1="2"
-          x2="21.5"
-          y2="51"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#5179ea" />
-          <stop offset="1" stopColor="#3762ea" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }
