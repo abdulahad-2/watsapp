@@ -1,10 +1,13 @@
+// frontend/scripts/fix-react-imports.js
+
 const fs = require("fs");
 const path = require("path");
 
-const rootDir = path.join(__dirname, "..", "src"); // full frontend/src folder
+// frontend/src folder ka path
+const rootDir = path.join(__dirname, "..", "src");
 
 function walkDir(dir, callback) {
-  fs.readdirSync(dir).forEach(file => {
+  fs.readdirSync(dir).forEach((file) => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) {
@@ -38,6 +41,7 @@ function fixReactImports() {
   console.log(`\n✅ Done! Fixed React imports in ${fixedCount} files.`);
 }
 
+// agar script direct run ho rahi hai
 if (require.main === module) {
   fixReactImports();
 }
