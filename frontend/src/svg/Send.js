@@ -1,5 +1,4 @@
 import React from 'react';
-
 function SendIcon({ className }) {
   return (
     React.createElement(

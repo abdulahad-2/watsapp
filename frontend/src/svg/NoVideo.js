@@ -1,5 +1,4 @@
 import React from 'react';
-
 function NoVideoIcon({ className }) {
   return (
     React.createElement(

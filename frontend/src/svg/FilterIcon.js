@@ -1,5 +1,4 @@
 import React from 'react';
-
 export default function FilterIcon({ className }) {
   return (
     React.createElement(

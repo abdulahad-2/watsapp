@@ -1,5 +1,4 @@
-import React from "react";
-
+import React from 'react';
 export default function StoryIcon({ className, active }) {
   if (active) {
     return (

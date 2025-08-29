@@ -1,5 +1,4 @@
 import React from 'react';
-
 export default function SeenIcon({ className }) {
   return (
     React.createElement(

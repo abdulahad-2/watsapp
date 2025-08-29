@@ -1,5 +1,4 @@
 import React from 'react';
-
 function AttachmentIcon({ className }) {
   return (
     React.createElement(

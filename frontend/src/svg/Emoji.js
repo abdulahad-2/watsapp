@@ -1,5 +1,4 @@
 import React from 'react';
-
 function EmojiIcon({ className }) {
   return (
     React.createElement(

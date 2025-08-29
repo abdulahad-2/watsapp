@@ -1,57 +1,42 @@
 import React from 'react';
 export default function DocumentIcon() {
   return (
-    React.createElement(
-      'svg',
-      {
-        xmlns: 'http://www.w3.org/2000/svg',
-        viewBox: '0 0 53 53',
-        height: '53',
-        width: '53',
-        preserveAspectRatio: 'xMidYMid meet',
-        className: '',
-        version: '1.1',
-        x: '0px',
-        y: '0px',
-        enableBackground: 'new 0 0 53 53'
-      },
-      React.createElement(
-        'g',
-        null,
-        React.createElement(
-          'defs',
-          null,
-          React.createElement('circle', {
-            id: 'document-SVGID_1_',
-            cx: 26.5,
-            cy: 26.5,
-            r: 25.5
-          })
-        ),
-        React.createElement('clipPath', {
-          id: 'document-SVGID_2_'
-        }),
-        React.createElement(
-          'g',
-          { clipPath: 'url(#document-SVGID_2_)' },
-          React.createElement('path', {
-            fill: '#5157AE',
-            d: 'M26.5-1.1C11.9-1.1-1.1,5.6-1.1,27.6h55.2C54,8.6,41.1-1.1,26.5-1.1z'
-          }),
-          React.createElement('path', {
-            fill: '#5F66CD',
-            d: 'M53,26.5H-1.1c0,14.6,13,27.6,27.6,27.6s27.6-13,27.6-27.6C54.1,26.5,53,26.5,53,26.5z'
-          })
-        )
-      ),
-      React.createElement(
-        'g',
-        { fill: '#F5F5F5' },
-        React.createElement('path', {
-          id: 'svg-document',
-          d: 'M29.09 17.09c-.38-.38-.89-.59-1.42-.59H20.5c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H32.5c1.1 0 2-.9 2-2V23.33c0-.53-.21-1.04-.59-1.41l-4.82-4.83zM27.5 22.5V18L33 23.5H28.5c-.55 0-1-.45-1-1z'
-        })
-      )
-    )
+    <svg
+      width={43}
+      height={53}
+      viewBox="0 0 43 53"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M25.645 2H7.05C5.35 2 4 3.35 4 5.05v42.9C4 49.65 5.35 51 7.05 51h28.9C37.65 51 39 49.65 39 47.95V16.355L25.645 2z"
+        fill="#5179ea"
+      />
+      <path
+        d="M39 16.355H29.695c-2.25 0-4.05-1.8-4.05-4.05V2L39 16.355z"
+        fill="#a5c3ff"
+      />
+      <path
+        d="M7.05 2C5.35 2 4 3.35 4 5.05v42.9C4 49.65 5.35 51 7.05 51h28.9C37.65 51 39 49.65 39 47.95V16.355H29.695c-2.25 0-4.05-1.8-4.05-4.05V2H7.05z"
+        fill="url(#paint0_linear_1141_21920)"
+      />
+      <path
+        d="M18.5 42h-7c-.55 0-1-.45-1-1s.45-1 1-1h7c.55 0 1 .45 1 1s-.45 1-1 1zm13-6h-20c-.55 0-1-.45-1-1s.45-1 1-1h20c.55 0 1 .45 1 1s-.45 1-1 1zm0-6h-20c-.55 0-1-.45-1-1s.45-1 1-1h20c.55 0 1 .45 1 1s-.45 1-1 1zm0-6h-20c-.55 0-1-.45-1-1s.45-1 1-1h20c.55 0 1 .45 1 1s-.45 1-1 1z"
+        fill="#fff"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_1141_21920"
+          x1={21.5}
+          y1={2}
+          x2={21.5}
+          y2={51}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#5179ea" />
+          <stop offset={1} stopColor="#3762ea" />
+        </linearGradient>
+      </defs>
+    </svg>
   );
 }

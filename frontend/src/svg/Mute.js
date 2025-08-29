@@ -1,5 +1,4 @@
-import React from "react";
-
+import React from 'react';
 function MuteIcon({ className }) {
   return (
     React.createElement(

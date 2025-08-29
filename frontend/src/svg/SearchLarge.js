@@ -1,5 +1,4 @@
-import React from "react";
-
+import React from 'react';
 function SearchLargeIcon({ className }) {
   return (
     React.createElement(
