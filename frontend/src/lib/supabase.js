@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Use import.meta.env for Vite projects
-const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'https://cwbobklimbexftagrouh.supabase.co';
-const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3Ym9ia2xpbWJleGZ0YWdyb3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MDM1MTIsImV4cCI6MjA3MTk3OTUxMn0.Ovvty8xTd3DX6KgRMjiw4WxGW6zly5RmHHKFwdl7MRQ';
+const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  // eslint-disable-next-line no-console
+  console.error('[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check Vercel env vars.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

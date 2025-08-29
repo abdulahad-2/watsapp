@@ -1,19 +1,26 @@
 import createHttpError from "http-errors";
-import { UserModel } from "../models/index.js";
+import { createClient } from '@supabase/supabase-js';
+
+const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
 export const findUser = async (userId) => {
-  const user = await UserModel.findById(userId);
-  if (!user) throw createHttpError.BadRequest("Please fill all fields.");
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  if (error || !user) throw createHttpError.BadRequest(error?.message || 'User not found');
   return user;
 };
 
 export const searchUsers = async (keyword, userId) => {
-  const users = await UserModel.find({
-    $or: [
-      { name: { $regex: keyword, $options: "i" } },
-      { email: { $regex: keyword, $options: "i" } },
-    ],
-  }).find({
-    _id: { $ne: userId },
-  });
-  return users;
+  // Search by name or email (case-insensitive) and exclude current user
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .or(`name.ilike.%${keyword}%,email.ilike.%${keyword}%`)
+    .neq('id', userId);
+  if (error) throw createHttpError.BadRequest(error.message);
+  return data || [];
 };

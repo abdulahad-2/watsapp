@@ -1,87 +1,106 @@
 import createHttpError from "http-errors";
-import { ConversationModel, UserModel } from "../models/index.js";
+import { createClient } from '@supabase/supabase-js';
+
+const { SUPABASE_URL, SUPABASE_SERVICE_KEY, DEFAULT_GROUP_PICTURE } = process.env;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 export const doesConversationExist = async (sender_id, receiver_id) => {
-  let convos = await ConversationModel.find({
-    isGroup: false,
-    $and: [
-      { users: { $elemMatch: { $eq: sender_id } } },
-      { users: { $elemMatch: { $eq: receiver_id } } },
-    ],
-  })
-    .populate("users", "-password")
-    .populate("latestMessage");
+  // Find conversations (non-group) that include sender
+  const { data: senderConvos, error: e1 } = await supabase
+    .from('conversation_users')
+    .select('conversation_id, conversations!inner(is_group)')
+    .eq('user_id', sender_id)
+    .eq('conversations.is_group', false);
+  if (e1) throw createHttpError.BadRequest(e1.message);
 
-  if (!convos) throw createHttpError.BadRequest("Something went wrong");
+  const convoIds = (senderConvos || []).map(r => r.conversation_id);
+  if (convoIds.length === 0) return null;
 
-  convos = await UserModel.populate(convos, {
-    path: "latestMessage.sender",
-    select: "name email picture status",
-  });
+  // Intersect with conversations that include receiver
+  const { data: receiverConvos, error: e2 } = await supabase
+    .from('conversation_users')
+    .select('conversation_id')
+    .in('conversation_id', convoIds)
+    .eq('user_id', receiver_id);
+  if (e2) throw createHttpError.BadRequest(e2.message);
 
-  // Ensure conversation has both users before returning
-  const existingConvo = convos[0];
-  if (existingConvo && existingConvo.users.length < 2) {
-    console.log(`Warning: Found conversation ${existingConvo._id} with only ${existingConvo.users.length} users`);
-    return null; // Force recreation
-  }
+  const existingId = (receiverConvos || [])[0]?.conversation_id;
+  if (!existingId) return null;
 
-  return existingConvo;
+  // Populate conversation with users and latest message sender
+  const { data: convo, error: e3 } = await supabase
+    .from('conversations')
+    .select(`
+      *,
+      users:conversation_users(users(*)),
+      latest_message:messages!conversations_latest_message_id_fkey(*, sender:users(*))
+    `)
+    .eq('id', existingId)
+    .single();
+  if (e3) throw createHttpError.BadRequest(e3.message);
+  return convo;
 };
 
 export const createConversation = async (data) => {
-  const newConvo = await ConversationModel.create(data);
-  if (!newConvo)
-    throw createHttpError.BadRequest("Oops...Something went wrong !");
-  return newConvo;
+  // data may contain: name, picture, isGroup, users, admin
+  const payload = {
+    name: data.name || null,
+    picture: data.picture || (data.isGroup ? DEFAULT_GROUP_PICTURE : null),
+    is_group: !!data.isGroup,
+    admin_id: data.admin || null,
+  };
+
+  const { data: convo, error } = await supabase
+    .from('conversations')
+    .insert(payload)
+    .select('*')
+    .single();
+  if (error || !convo) throw createHttpError.BadRequest(error?.message || 'Failed to create conversation');
+
+  // Insert members
+  const members = data.users || [];
+  if (members.length) {
+    const rows = members.map(uid => ({ conversation_id: convo.id, user_id: uid }));
+    const { error: e2 } = await supabase.from('conversation_users').insert(rows);
+    if (e2) throw createHttpError.BadRequest(e2.message);
+  }
+  return convo;
 };
 
-export const populateConversation = async (
-  id,
-  fieldToPopulate,
-  fieldsToRemove
-) => {
-  const populatedConvo = await ConversationModel.findOne({ _id: id }).populate(
-    fieldToPopulate,
-    fieldsToRemove
-  );
-  if (!populatedConvo)
-    throw createHttpError.BadRequest("Oops...Something went wrong !");
-  return populatedConvo;
+export const populateConversation = async (id, _fieldToPopulate, _fieldsToRemove) => {
+  // Return conversation with users and admin data
+  const { data: convo, error } = await supabase
+    .from('conversations')
+    .select(`
+      *,
+      admin:users!conversations_admin_id_fkey(*),
+      users:conversation_users(users(*))
+    `)
+    .eq('id', id)
+    .single();
+  if (error || !convo) throw createHttpError.BadRequest(error?.message || 'Failed to populate conversation');
+  return convo;
 };
 export const getUserConversations = async (user_id) => {
-  let conversations;
-  await ConversationModel.find({
-    users: { $elemMatch: { $eq: user_id } },
-  })
-    .populate("users", "-password")
-    .populate("admin", "-password")
-    .populate("latestMessage")
-    .sort({ updatedAt: -1 })
-    .then(async (results) => {
-      results = await UserModel.populate(results, {
-        path: "latestMessage.sender",
-        select: "name email picture status",
-      });
-      // Debug: Check if users are properly populated
-      results.forEach(convo => {
-        console.log(`Conversation ${convo._id} has ${convo.users?.length || 0} users:`, 
-          convo.users?.map(u => u._id) || 'No users');
-      });
-      conversations = results;
-    })
-    .catch((err) => {
-      throw createHttpError.BadRequest("Oops...Something went wrong !");
-    });
-  return conversations;
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(`
+      *,
+      users:conversation_users!inner(user_id),
+      members:conversation_users(users(*)),
+      latest_message:messages!conversations_latest_message_id_fkey(*, sender:users(*))
+    `)
+    .eq('users.user_id', user_id)
+    .order('updated_at', { ascending: false });
+  if (error) throw createHttpError.BadRequest(error.message);
+  return data || [];
 };
 
 export const updateLatestMessage = async (convo_id, msg) => {
-  const updatedConvo = await ConversationModel.findByIdAndUpdate(convo_id, {
-    latestMessage: msg,
-  });
-  if (!updatedConvo)
-    throw createHttpError.BadRequest("Oops...Something went wrong !");
-
-  return updatedConvo;
+  const { error } = await supabase
+    .from('conversations')
+    .update({ latest_message_id: msg.id })
+    .eq('id', convo_id);
+  if (error) throw createHttpError.BadRequest(error.message);
+  return { success: true };
 };
