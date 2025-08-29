@@ -42,7 +42,11 @@ function Home({ socket }) {
   const [typing, setTyping] = useState(false);
   //join user into the socket io
   useEffect(() => {
-    socket.emit("join", user._id);
+    // Support both Mongo (_id) and Supabase (id)
+    const userId = user?.id || user?._id;
+    if (userId) {
+      socket.emit("join", userId);
+    }
     //get online users
     socket.on("get-online-users", (users) => {
       setOnlineUsers(users);
@@ -185,7 +189,7 @@ function Home({ socket }) {
         <div className="container h-screen flex py-[19px]">
           {/*Sidebar*/}
           <Sidebar onlineUsers={onlineUsers} typing={typing} />
-          {activeConversation._id ? (
+          {(activeConversation?.id || activeConversation?._id) ? (
             <ChatContainer
               onlineUsers={onlineUsers}
               callUser={callUser}
