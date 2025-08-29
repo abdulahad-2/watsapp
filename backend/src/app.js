@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import fileUpload from "express-fileupload";
@@ -30,8 +29,6 @@ app.use(express.json());
 //parse json request body
 app.use(express.urlencoded({ extended: true }));
 
-//sanitize request data
-app.use(mongoSanitize());
 
 //enable cookie parser
 app.use(cookieParser());
@@ -49,7 +46,7 @@ app.use(
 //cors
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_ENDPOINT || "http://localhost:3000",
     credentials: true,
   })
 );

@@ -22,37 +22,33 @@ function App() {
   const { user } = useSelector((state) => state.user);
   const { token } = user;
 
-  return (
-    <div className="dark">
-      <SocketContext.Provider value={socket}>
-        <Router>
-          <Routes>
-            <Route
-              exact
-              path="/"
-              element={
-                token ? <Home socket={socket} /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              exact
-              path="/login"
-              element={!token ? <Login /> : <Navigate to="/" />}
-            />
-            <Route
-              exact
-              path="/register"
-              element={!token ? <Register /> : <Navigate to="/" />}
-            />
-            <Route
-              exact
-              path="/test-connection"
-              element={<TestConnection />}
-            />
-          </Routes>
-        </Router>
-      </SocketContext.Provider>
-    </div>
+  return React.createElement("div", { className: "dark" },
+    React.createElement(SocketContext.Provider, { value: socket },
+      React.createElement(Router, null,
+        React.createElement(Routes, null,
+          React.createElement(Route, {
+            exact: true,
+            path: "/",
+            element: token ? React.createElement(Home, { socket }) : React.createElement(Navigate, { to: "/login" })
+          }),
+          React.createElement(Route, {
+            exact: true,
+            path: "/login",
+            element: !token ? React.createElement(Login) : React.createElement(Navigate, { to: "/" })
+          }),
+          React.createElement(Route, {
+            exact: true,
+            path: "/register",
+            element: !token ? React.createElement(Register) : React.createElement(Navigate, { to: "/" })
+          }),
+          React.createElement(Route, {
+            exact: true,
+            path: "/test-connection",
+            element: React.createElement(TestConnection)
+          })
+        )
+      )
+    )
   );
 }
 
