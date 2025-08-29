@@ -1,9 +1,8 @@
-import React from 'react';
 export default function DocumentIcon() {
   return (
     <svg
-      width={43}
-      height={53}
+      width="43"
+      height="53"
       viewBox="0 0 43 53"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -27,14 +26,14 @@ export default function DocumentIcon() {
       <defs>
         <linearGradient
           id="paint0_linear_1141_21920"
-          x1={21.5}
-          y1={2}
-          x2={21.5}
-          y2={51}
+          x1="21.5"
+          y1="2"
+          x2="21.5"
+          y2="51"
           gradientUnits="userSpaceOnUse"
         >
           <stop stopColor="#5179ea" />
-          <stop offset={1} stopColor="#3762ea" />
+          <stop offset="1" stopColor="#3762ea" />
         </linearGradient>
       </defs>
     </svg>
