@@ -19,6 +19,7 @@ const io = new Server(server, {
     origin: [
       process.env.CLIENT_ENDPOINT || "http://localhost:3000",
       "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
+      "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
       "https://watsapp-mu.vercel.app"
     ],
     credentials: true,
