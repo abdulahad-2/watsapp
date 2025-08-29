@@ -37,7 +37,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "normalize:icons": "node scripts/normalize-icons.js",
+    "fix:svg": "node scripts/fix-jsx-svg.js",
+    "svgr:icons": "npx @svgr/cli --icon --typescript=false --replace-attr-values \"#000=currentColor\" --ext js --out-dir src/svg assets/svg"
   },
   "eslintConfig": {
     "extends": [
@@ -58,6 +61,7 @@
     ]
   },
   "devDependencies": {
+    "@svgr/cli": "^8.1.0",
     "@vitejs/plugin-react": "^4.0.0",
     "tailwindcss": "^3.2.7",
     "vite": "^4.5.14"
