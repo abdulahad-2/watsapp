@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function PollIcon() {
   return (
     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 53 53' height='53' width='53' preserveAspectRatio='xMidYMid meet' className='' fill='none'><circle cx='26.5' cy='26.5' r='26.5' fill='#02A698' />,

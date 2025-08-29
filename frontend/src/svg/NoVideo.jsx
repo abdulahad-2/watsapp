@@ -1,3 +1,5 @@
+import React from 'react';
+
 function NoVideoIcon({ className }) {
   return (
     <svg xmlns='http://www.w3.org/2000/svg' width={30} className={className} version='1.1' viewBox='0 0 520 520' xmlSpace='preserve'>

@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function StickerIcon() {
   return (
     <svg xmlns='http://www.w3.org/2000/svg' width={53} height={53} fill='none' viewBox='0 0 53 53'>

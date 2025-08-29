@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function NotificationIcon({ className }) {
   return (
     <svg 
