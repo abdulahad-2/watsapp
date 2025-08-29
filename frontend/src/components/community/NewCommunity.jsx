@@ -5,7 +5,7 @@ import { ClipLoader } from "react-spinners";
 import React from 'react';
 
 export default function NewCommunity({ setShowNewCommunity }) {
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user) || {};
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
@@ -16,35 +16,41 @@ export default function NewCommunity({ setShowNewCommunity }) {
       alert("Community name is required");
       return;
     }
-    
+
+    if (!user?.token) {
+      alert("You must be logged in to create a community");
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/community`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({
-          name: communityName,
-          description,
-          isPrivate
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_ENDPOINT || "http://localhost:5000"}/api/v1/community`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ name: communityName, description, isPrivate }),
+        }
+      );
 
-      if (response.ok) {
-        const newCommunity = await response.json();
-        console.log("Community created:", newCommunity);
-        alert("Community created successfully!");
-        setShowNewCommunity(false);
-      } else {
-        throw new Error("Failed to create community");
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || "Failed to create community");
       }
+
+      const newCommunity = await response.json();
+      console.log("Community created:", newCommunity);
+      alert("Community created successfully!");
+      setShowNewCommunity(false);
     } catch (error) {
       console.error("Failed to create community:", error);
       alert("Failed to create community. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -52,18 +58,11 @@ export default function NewCommunity({ setShowNewCommunity }) {
       <div className="bg-dark_bg_2 rounded-lg p-6 w-96 max-w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => setShowNewCommunity(false)}
-            className="btn"
-          >
+          <button onClick={() => setShowNewCommunity(false)} className="btn">
             <ReturnIcon className="dark:fill-dark_svg_1" />
           </button>
           <h2 className="text-lg font-semibold dark:text-dark_text_1">New Community</h2>
-          <button
-            onClick={handleCreate}
-            disabled={loading}
-            className="btn"
-          >
+          <button onClick={handleCreate} disabled={loading} className="btn">
             {loading ? (
               <ClipLoader color="#E9EDEF" size={20} />
             ) : (
