@@ -46,7 +46,11 @@ app.use(
 //cors
 app.use(
   cors({
-    origin: process.env.CLIENT_ENDPOINT || "http://localhost:3000",
+    origin: [
+      process.env.CLIENT_ENDPOINT || "http://localhost:3000",
+      "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
+      "https://watsapp-mu.vercel.app"
+    ],
     credentials: true,
   })
 );

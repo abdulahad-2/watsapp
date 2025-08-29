@@ -16,7 +16,12 @@ server = app.listen(PORT, () => {
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: process.env.CLIENT_ENDPOINT,
+    origin: [
+      process.env.CLIENT_ENDPOINT || "http://localhost:3000",
+      "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
+      "https://watsapp-mu.vercel.app"
+    ],
+    credentials: true,
   },
 });
 io.on("connection", (socket) => {
