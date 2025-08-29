@@ -1,10 +1,12 @@
 import createHttpError from "http-errors";
 import validator from "validator";
-import bcrypt from "bcrypt";
-import { UserModel } from "../models/index.js";
+import { createClient } from '@supabase/supabase-js';
 
 //env variables
-const { DEFAULT_PICTURE, DEFAULT_STATUS } = process.env;
+const { DEFAULT_PICTURE, DEFAULT_STATUS, SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env;
+
+// Initialize Supabase client
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 export const createUser = async (userData) => {
   const { name, email, picture, status, password } = userData;
@@ -40,14 +42,6 @@ export const createUser = async (userData) => {
     );
   }
 
-  //check if user already exist
-  const checkDb = await UserModel.findOne({ email });
-  if (checkDb) {
-    throw createHttpError.Conflict(
-      "Please try again with a different email address, this email already exist."
-    );
-  }
-
   //check password length
   if (
     !validator.isLength(password, {
@@ -60,30 +54,39 @@ export const createUser = async (userData) => {
     );
   }
 
-  //hash password--->to be done in the user model
-
-  //adding user to databse
-  const user = await new UserModel({
-    name,
+  // Use Supabase auth to create user
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
-    picture: picture || DEFAULT_PICTURE,
-    status: status || DEFAULT_STATUS,
     password,
-  }).save();
+    user_metadata: {
+      name,
+      picture: picture || DEFAULT_PICTURE,
+      status: status || DEFAULT_STATUS,
+    }
+  });
 
-  return user;
+  if (authError) {
+    if (authError.message.includes('already registered')) {
+      throw createHttpError.Conflict(
+        "Please try again with a different email address, this email already exist."
+      );
+    }
+    throw createHttpError.BadRequest(authError.message);
+  }
+
+  return authData.user;
 };
 
 export const signUser = async (email, password) => {
-  const user = await UserModel.findOne({ email: email.toLowerCase() }).lean();
+  // Use Supabase auth to sign in user
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.toLowerCase(),
+    password
+  });
 
-  //check if user exist
-  if (!user) throw createHttpError.NotFound("Invalid credentials.");
+  if (error) {
+    throw createHttpError.NotFound("Invalid credentials.");
+  }
 
-  //compare passwords
-  let passwordMatches = await bcrypt.compare(password, user.password);
-
-  if (!passwordMatches) throw createHttpError.NotFound("Invalid credentials.");
-
-  return user;
+  return data.user;
 };
