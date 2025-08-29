@@ -183,41 +183,31 @@ function Home({ socket }) {
     });
   }, [dispatch, socket]);
   return (
-    <>
-      <div className="h-screen dark:bg-dark_bg_1 flex items-center justify-center overflow-hidden">
-        {/*container*/}
-        <div className="container h-screen flex py-[19px]">
-          {/*Sidebar*/}
-          <Sidebar onlineUsers={onlineUsers} typing={typing} />
-          {(activeConversation?.id || activeConversation?._id) ? (
-            <ChatContainer
-              onlineUsers={onlineUsers}
-              callUser={callUser}
-              typing={typing}
-            />
-          ) : (
-            <WhatsappHome />
-          )}
-        </div>
-      </div>
-      {/*Call*/}
-
-      <div className={(show || call.signal) && !call.callEnded ? "" : "hidden"}>
-        <Call
-          call={call}
-          setCall={setCall}
-          callAccepted={callAccepted}
-          myVideo={myVideo}
-          userVideo={userVideo}
-          stream={stream}
-          answerCall={answerCall}
-          show={show}
-          endCall={endCall}
-          totalSecInCall={totalSecInCall}
-          setTotalSecInCall={setTotalSecInCall}
-        />
-      </div>
-    </>
+    React.createElement(React.Fragment, null,
+      React.createElement("div", { className: "h-screen dark:bg-dark_bg_1 flex items-center justify-center overflow-hidden" },
+        React.createElement("div", { className: "container h-screen flex py-[19px]" },
+          React.createElement(Sidebar, { onlineUsers: onlineUsers, typing: typing }),
+          (activeConversation?.id || activeConversation?._id)
+            ? React.createElement(ChatContainer, { onlineUsers: onlineUsers, callUser: callUser, typing: typing })
+            : React.createElement(WhatsappHome)
+        )
+      ),
+      React.createElement("div", { className: (show || call.signal) && !call.callEnded ? "" : "hidden" },
+        React.createElement(Call, {
+          call: call,
+          setCall: setCall,
+          callAccepted: callAccepted,
+          myVideo: myVideo,
+          userVideo: userVideo,
+          stream: stream,
+          answerCall: answerCall,
+          show: show,
+          endCall: endCall,
+          totalSecInCall: totalSecInCall,
+          setTotalSecInCall: setTotalSecInCall
+        })
+      )
+    )
   );
 }
 
