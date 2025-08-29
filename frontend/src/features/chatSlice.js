@@ -1,8 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const CONVERSATION_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/conversation`;
-const MESSAGE_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/message`;
+// Ye tera backend link hai jo Render pe chal raha hai
+const API_BASE_URL = "https://watsapp-backend-mscv.onrender.com";
+
+// Ab isi se endpoints bana le
+const CONVERSATION_ENDPOINT = `${API_BASE_URL}/api/v1/conversation`;
+const MESSAGE_ENDPOINT = `${API_BASE_URL}/api/v1/message`;
+
 
 const initialState = {
   status: "",
