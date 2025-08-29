@@ -12,19 +12,25 @@ server = app.listen(PORT, () => {
   logger.info(`Server is listening at ${PORT}.`);
 });
 
+// Allowed Origins
+const allowedOrigins = [
+  process.env.CLIENT_ENDPOINT || "http://localhost:3000",
+  "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
+  "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
+  "https://chatapp-rho-six.vercel.app",
+  "https://watsapp-mu.vercel.app"
+];
+
 //socket io
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: [
-      process.env.CLIENT_ENDPOINT || "http://localhost:3000",
-      "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
-      "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
-      "https://watsapp-mu.vercel.app"
-    ],
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],   // ✅ add this
     credentials: true,
   },
 });
+
 io.on("connection", (socket) => {
   logger.info("socket io connected successfully.");
   SocketServer(socket, io);
