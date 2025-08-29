@@ -212,8 +212,10 @@ function Home({ socket }) {
 }
 
 const HomeWithSocket = (props) => (
-  <SocketContext.Consumer>
-    {(socket) => <Home {...props} socket={socket} />}
-  </SocketContext.Consumer>
+  React.createElement(
+    SocketContext.Consumer,
+    null,
+    (socket) => React.createElement(Home, { ...props, socket })
+  )
 );
 export default HomeWithSocket;
