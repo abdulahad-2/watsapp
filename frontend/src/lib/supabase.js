@@ -9,18 +9,28 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check Vercel env vars.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
+let supabase;
+
+try {
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
     }
-  }
-})
+  });
+} catch (error) {
+  console.error('[Supabase] Error initializing client:', error);
+  // Potentially re-throw or handle the error gracefully based on application needs
+  supabase = null; // Ensure supabase is null if initialization fails
+}
+
+export { supabase };
 
 // Auth helpers
 export const auth = {
