@@ -9,6 +9,7 @@ export default defineConfig({
   ],
   optimizeDeps: {
     include: ["@supabase/supabase-js"],
+    exclude: ["@supabase/gotrue-js"],
   },
   build: {
     commonjsOptions: {

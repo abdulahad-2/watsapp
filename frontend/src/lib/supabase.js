@@ -12,34 +12,21 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("[Supabase] Missing environment variables");
   throw new Error("Missing Supabase environment variables");
 }
 
-let supabaseInstance;
+const options = {
+  db: {
+    schema: "public",
+  },
+  auth: {
+    storageKey: "watsapp_auth",
+    autoRefreshToken: true,
+    persistSession: true,
+  },
+};
 
-if (typeof window !== "undefined") {
-  supabaseInstance = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      storageKey: "watsapp_auth",
-      autoRefreshToken: true,
-      persistSession: true,
-      storage: window.localStorage,
-    },
-    global: {
-      fetch: window.fetch.bind(window),
-    },
-  });
-} else {
-  supabaseInstance = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
-
-const supabase = supabaseInstance;
+const supabase = createClient(supabaseUrl, supabaseKey, options);
 
 export { supabase };
 
