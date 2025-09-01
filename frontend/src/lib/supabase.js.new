@@ -17,7 +17,7 @@ const createSupabaseClient = () => {
   }
 
   const headers = {
-    "X-Client-Info": "supabase-js/2.56.0",
+    'X-Client-Info': 'supabase-js/2.56.0',
   };
 
   const options = {
@@ -25,11 +25,11 @@ const createSupabaseClient = () => {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      storageKey: "whatsapp-auth-token",
+      storageKey: 'whatsapp-auth-token',
     },
     global: {
-      headers,
-    },
+      headers
+    }
   };
 
   try {
@@ -50,15 +50,10 @@ const withRetry = async (operation, maxRetries = 3) => {
     try {
       return await operation();
     } catch (error) {
-      console.error(
-        `Operation failed (attempt ${i + 1}/${maxRetries}):`,
-        error
-      );
+      console.error(`Operation failed (attempt ${i + 1}/${maxRetries}):`, error);
       lastError = error;
       if (i < maxRetries - 1) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, 1000 * Math.pow(2, i))
-        );
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
       }
     }
   }
@@ -72,7 +67,7 @@ export const auth = {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: metadata },
+        options: { data: metadata }
       });
       if (error) throw error;
       return data;
@@ -83,7 +78,7 @@ export const auth = {
     return withRetry(async () => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       });
       if (error) throw error;
       return data;
@@ -92,7 +87,7 @@ export const auth = {
 
   signOut: () => supabase.auth.signOut(),
   getUser: () => supabase.auth.getUser(),
-  onAuthStateChange: (callback) => supabase.auth.onAuthStateChange(callback),
+  onAuthStateChange: (callback) => supabase.auth.onAuthStateChange(callback)
 };
 
 // Database helpers
@@ -100,58 +95,66 @@ export const db = {
   // Users
   getUser: (id) =>
     withRetry(() => supabase.from("users").select("*").eq("id", id).single()),
+
   updateUser: (id, updates) =>
     withRetry(() => supabase.from("users").update(updates).eq("id", id)),
+
   searchUsers: (query) =>
-    withRetry(() =>
-      supabase.from("users").select("*").ilike("name", `%${query}%`)
-    ),
+    withRetry(() => supabase.from("users").select("*").ilike("name", `%${query}%`)),
 
   // Conversations
   getUserConversations: (userId) =>
-    supabaseClient
-      .from("conversations")
-      .select(
-        `
-        *,
-        conversation_users!inner(user_id),
-        users:conversation_users(users(*)),
-        messages:latest_message_id(*)
-      `
-      )
-      .eq("conversation_users.user_id", userId)
-      .order("updated_at", { ascending: false }),
+    withRetry(() =>
+      supabase
+        .from("conversations")
+        .select(`
+          *,
+          conversation_users!inner(user_id),
+          users:conversation_users(users(*)),
+          messages:latest_message_id(*)
+        `)
+        .eq("conversation_users.user_id", userId)
+        .order("updated_at", { ascending: false })
+    ),
 
   createConversation: (conversationData, userIds) =>
-    supabaseClient.rpc("create_conversation_with_users", {
-      conversation_data: conversationData,
-      user_ids: userIds,
-    }),
+    withRetry(() =>
+      supabase.rpc("create_conversation_with_users", {
+        conversation_data: conversationData,
+        user_ids: userIds,
+      })
+    ),
 
   // Messages
   getConversationMessages: (conversationId) =>
-    supabaseClient
-      .from("messages")
-      .select(
-        `
-        *,
-        sender:users(*)
-      `
-      )
-      .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true }),
+    withRetry(() =>
+      supabase
+        .from("messages")
+        .select(`
+          *,
+          sender:users(*)
+        `)
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: true })
+    ),
 
   sendMessage: (messageData) =>
-    supabaseClient.from("messages").insert(messageData).select().single(),
+    withRetry(() =>
+      supabase.from("messages").insert(messageData).select().single()
+    ),
 
   deleteMessage: (messageId) =>
-    supabaseClient
-      .from("messages")
-      .update({ deleted: true })
-      .eq("id", messageId),
+    withRetry(() =>
+      supabase
+        .from("messages")
+        .update({ deleted: true })
+        .eq("id", messageId)
+    ),
 
   starMessage: (messageId, starred) =>
-    supabaseClient.from("messages").update({ starred }).eq("id", messageId),
+    withRetry(() =>
+      supabase.from("messages").update({ starred }).eq("id", messageId)
+    ),
 };
 
 // Real-time subscriptions with auto-reconnect
@@ -170,7 +173,7 @@ export const realtime = {
         callback
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIPTION_ERROR") {
+        if (status === 'SUBSCRIPTION_ERROR') {
           console.log(`Reconnecting to ${name}...`);
           setTimeout(() => {
             channel.unsubscribe();
