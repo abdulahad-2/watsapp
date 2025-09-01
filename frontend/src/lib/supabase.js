@@ -1,37 +1,52 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Basic environment variable checks
+// ------------------------
+// 🔥 Debug: Check environment variables
+// ------------------------
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log("Debug: Supabase URL ->", supabaseUrl);
+console.log("Debug: Supabase Key ->", supabaseKey);
+
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Environment variables check:", {
-    url: !!supabaseUrl,
-    key: !!supabaseKey,
-  });
+  console.error("Environment variables missing!");
   throw new Error("Missing Supabase environment variables");
 }
 
-// Create the client with global headers to avoid undefined error
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  global: { headers: {} }, // <- Fix here
+// ------------------------
+// 🔥 Debug: Supabase client options
+// ------------------------
+const supabaseOptions = {
+  global: { headers: {} }, // ensures 'headers' exists
   auth: {
     autoRefreshToken: true,
     persistSession: true,
   },
-});
+};
 
-// Auth helpers with retry mechanism
+console.log("Debug: Supabase client options ->", supabaseOptions);
+
+// ------------------------
+// 🔥 Create the Supabase client
+// ------------------------
+let supabase;
+try {
+  supabase = createClient(supabaseUrl, supabaseKey, supabaseOptions);
+  console.log("Debug: Supabase client created successfully!", supabase);
+} catch (err) {
+  console.error("🔥 Error creating Supabase client:", err);
+  throw err;
+}
+
+// 🔹 Retry helper
 const withRetry = async (operation, maxRetries = 3) => {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await operation();
     } catch (error) {
-      console.error(
-        `Operation failed (attempt ${i + 1}/${maxRetries}):`,
-        error
-      );
+      console.error(`Retry attempt ${i + 1}/${maxRetries} failed:`, error);
       lastError = error;
       if (i < maxRetries - 1) {
         await new Promise((resolve) =>
@@ -43,7 +58,9 @@ const withRetry = async (operation, maxRetries = 3) => {
   throw lastError;
 };
 
-// Auth helpers
+// ------------------------
+// 🔹 Auth helpers
+// ------------------------
 export const auth = {
   signUp: async (email, password, metadata) => {
     return withRetry(async () => {
@@ -73,7 +90,9 @@ export const auth = {
   onAuthStateChange: (callback) => supabase.auth.onAuthStateChange(callback),
 };
 
-// Database helpers
+// ------------------------
+// 🔹 Database helpers
+// ------------------------
 export const db = {
   // Users
   getUser: (id) =>
@@ -136,7 +155,9 @@ export const db = {
     ),
 };
 
-// Real-time subscriptions with auto-reconnect
+// ------------------------
+// 🔹 Realtime subscriptions
+// ------------------------
 export const realtime = {
   createChannel: (name, table, filter, callback) => {
     const channel = supabase
@@ -152,11 +173,12 @@ export const realtime = {
         callback
       )
       .subscribe((status) => {
+        console.log(`Realtime channel '${name}' status:`, status);
         if (status === "SUBSCRIPTION_ERROR") {
           console.log(`Reconnecting to ${name}...`);
           setTimeout(() => {
             channel.unsubscribe();
-            this.createChannel(name, table, filter, callback);
+            realtime.createChannel(name, table, filter, callback);
           }, 1000);
         }
       });
@@ -188,3 +210,21 @@ export const realtime = {
       callback
     ),
 };
+
+// ------------------------
+// 🔹 Debug: Test function to verify client works
+// ------------------------
+export const testSupabaseConnection = async () => {
+  try {
+    console.log("Debug: Fetching session...");
+    const session = await supabase.auth.getSession();
+    console.log("Debug: Session fetched ->", session);
+  } catch (err) {
+    console.error("🔥 Supabase auth test failed:", err);
+  }
+};
+
+// ------------------------
+// 🔹 Export Supabase client and retry helper
+// ------------------------
+export { supabase, withRetry };
