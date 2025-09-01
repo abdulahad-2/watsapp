@@ -12,7 +12,7 @@ export default defineConfig({
     exclude: ["@supabase/gotrue-js"],
     esbuildOptions: {
       define: {
-        global: "global",
+        global: "globalThis",
       },
     },
   },

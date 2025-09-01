@@ -21,14 +21,14 @@ let supabaseOptions = {
   },
 };
 
-// If bundler renamed `global` to `globalThis`, fix it
-if (!supabaseOptions.global && supabaseOptions.globalThis) {
-  console.warn(
-    "⚠️ globalThis found, renaming to global to prevent 'headers' error"
-  );
-  supabaseOptions.global = supabaseOptions.globalThis;
-  delete supabaseOptions.globalThis;
-}
+// // If bundler renamed `global` to `globalThis`, fix it
+// if (!supabaseOptions.global && supabaseOptions.globalThis) {
+//   console.warn(
+//     "⚠️ globalThis found, renaming to global to prevent 'headers' error"
+//   );
+//   supabaseOptions.global = supabaseOptions.globalThis;
+//   delete supabaseOptions.globalThis;
+// }
 
 // ------------------------
 // Create Supabase client
