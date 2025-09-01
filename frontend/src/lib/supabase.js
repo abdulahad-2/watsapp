@@ -3,32 +3,20 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  // eslint-disable-next-line no-console
-  console.error(
-    "[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check Vercel env vars."
-  );
+if (!supabaseUrl || !supabaseKey) {
+  console.error("[Supabase] Missing environment variables");
+  throw new Error("Missing Supabase environment variables");
 }
 
-let supabase;
-
-try {
-  if (typeof window !== "undefined") {
-    supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        storageKey: "watsapp_auth",
-        storage: window.localStorage,
-        persistSession: true,
-        detectSessionInUrl: true,
-        autoRefreshToken: true,
-      },
-    });
-  }
-} catch (error) {
-  console.error("[Supabase] Error initializing client:", error);
-  // Potentially re-throw or handle the error gracefully based on application needs
-  supabase = null; // Ensure supabase is null if initialization fails
-}
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    storageKey: "watsapp_auth",
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 
 export { supabase };
 
