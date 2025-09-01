@@ -1,13 +1,56 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Ensure environment variables are available
+const getSupabaseConfig = () => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing Supabase environment variables");
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Missing Supabase environment variables:", {
+      url: !!supabaseUrl,
+      key: !!supabaseKey,
+    });
+    throw new Error("Missing Supabase environment variables");
+  }
+
+  return { supabaseUrl, supabaseKey };
+};
+
+// Create client with explicit options
+const createSupabaseClient = () => {
+  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+
+  const options = {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+    global: {
+      headers: {
+        "x-client-info": "whatsapp-frontend@1.0.0",
+      },
+    },
+  };
+
+  return createClient(supabaseUrl, supabaseKey, options);
+};
+
+// Initialize client with error handling
+let supabaseClient = null;
+
+try {
+  supabaseClient = createSupabaseClient();
+} catch (error) {
+  console.error("Failed to initialize Supabase client:", error);
+  // Provide a more detailed error for debugging
+  if (error.message.includes("headers")) {
+    console.error(
+      "Headers initialization failed. Check that all required configurations are loaded."
+    );
+  }
+  throw error;
 }
-
-const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
 export const supabase = supabaseClient;
 
