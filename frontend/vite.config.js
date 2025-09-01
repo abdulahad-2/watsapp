@@ -9,7 +9,23 @@ export default defineConfig({
   ],
   optimizeDeps: {
     include: ["@supabase/supabase-js"],
-    exclude: ["@supabase/gotrue-js"],
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    sourcemap: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "supabase-vendor": ["@supabase/supabase-js"],
+          "redux-vendor": ["@reduxjs/toolkit", "react-redux"],
+          "socket-vendor": ["socket.io-client"],
+        },
+      },
+    },
   },
   resolve: {
     alias: {
@@ -21,8 +37,5 @@ export default defineConfig({
   },
   define: {
     global: "globalThis",
-  },
-  build: {
-    sourcemap: true, // ✅ enable source maps for debugging
   },
 });

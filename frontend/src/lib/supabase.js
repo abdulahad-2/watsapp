@@ -1,5 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
+// Debug logging for environment variables
+console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+console.log(
+  "Supabase Key:",
+  import.meta.env.VITE_SUPABASE_ANON_KEY ? "Loaded ✅" : "MISSING ❌"
+);
+console.log("All env variables:", import.meta.env);
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -8,15 +16,30 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    storageKey: "watsapp_auth",
-    storage: typeof window !== "undefined" ? window.localStorage : undefined,
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+let supabaseInstance;
+
+if (typeof window !== "undefined") {
+  supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      storageKey: "watsapp_auth",
+      autoRefreshToken: true,
+      persistSession: true,
+      storage: window.localStorage,
+    },
+    global: {
+      fetch: window.fetch.bind(window),
+    },
+  });
+} else {
+  supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+const supabase = supabaseInstance;
 
 export { supabase };
 
