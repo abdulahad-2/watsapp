@@ -1,47 +1,49 @@
 import { createClient } from "@supabase/supabase-js";
 
 // ------------------------
-// 🔥 Debug: Check environment variables
+// Environment variables
 // ------------------------
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log("Debug: Supabase URL ->", supabaseUrl);
-console.log("Debug: Supabase Key ->", supabaseKey);
-
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Environment variables missing!");
   throw new Error("Missing Supabase environment variables");
 }
 
 // ------------------------
-// 🔥 Correct client options
+// Forcefully fix options to prevent 'headers undefined'
 // ------------------------
-const supabaseOptions = {
-  global: { headers: {} }, // MUST be 'global', not 'globalThis'
+let supabaseOptions = {
+  global: { headers: {} },
   auth: {
     autoRefreshToken: true,
     persistSession: true,
   },
 };
 
-console.log("Debug: Supabase client options ->", supabaseOptions);
-console.log("Debug: Keys in options ->", Object.keys(supabaseOptions));
+// If bundler renamed `global` to `globalThis`, fix it
+if (!supabaseOptions.global && supabaseOptions.globalThis) {
+  console.warn(
+    "⚠️ globalThis found, renaming to global to prevent 'headers' error"
+  );
+  supabaseOptions.global = supabaseOptions.globalThis;
+  delete supabaseOptions.globalThis;
+}
 
 // ------------------------
-// 🔥 Create Supabase client
+// Create Supabase client
 // ------------------------
 let supabase;
 try {
   supabase = createClient(supabaseUrl, supabaseKey, supabaseOptions);
-  console.log("Debug: Supabase client created successfully!", supabase);
+  console.log("Supabase client created successfully ✅");
 } catch (err) {
   console.error("🔥 Error creating Supabase client:", err);
   throw err;
 }
 
 // ------------------------
-// 🔹 Retry helper
+// Retry helper
 // ------------------------
 const withRetry = async (operation, maxRetries = 3) => {
   let lastError;
@@ -62,7 +64,7 @@ const withRetry = async (operation, maxRetries = 3) => {
 };
 
 // ------------------------
-// 🔹 Auth helpers
+// Auth helpers
 // ------------------------
 export const auth = {
   signUp: async (email, password, metadata) =>
@@ -92,7 +94,7 @@ export const auth = {
 };
 
 // ------------------------
-// 🔹 Database helpers
+// Database helpers
 // ------------------------
 export const db = {
   getUser: (id) =>
@@ -154,7 +156,7 @@ export const db = {
 };
 
 // ------------------------
-// 🔹 Realtime helpers
+// Realtime helpers
 // ------------------------
 export const realtime = {
   createChannel: (name, table, filter, callback) => {
@@ -205,19 +207,19 @@ export const realtime = {
 };
 
 // ------------------------
-// 🔹 Test function
+// Test function
 // ------------------------
 export const testSupabaseConnection = async () => {
   try {
-    console.log("Debug: Fetching session...");
+    console.log("Fetching session...");
     const session = await supabase.auth.getSession();
-    console.log("Debug: Session fetched ->", session);
+    console.log("Session fetched ->", session);
   } catch (err) {
-    console.error("🔥 Supabase auth test failed:", err);
+    console.error("Supabase auth test failed:", err);
   }
 };
 
 // ------------------------
-// 🔹 Export client
+// Export Supabase client
 // ------------------------
 export { supabase, withRetry };
