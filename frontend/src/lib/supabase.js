@@ -35,7 +35,7 @@ let supabaseOptions = {
 // ------------------------
 let supabase;
 try {
-  supabase = createClient(supabaseUrl, supabaseKey, supabaseOptions);
+  supabase = createClient(supabaseUrl, supabaseKey);
   console.log("Supabase client created successfully ✅");
 } catch (err) {
   console.error("🔥 Error creating Supabase client:", err);
