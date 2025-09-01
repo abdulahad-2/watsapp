@@ -19,20 +19,40 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 // Middleware
 export default async function authMiddleware(req, res, next) {
   try {
-    console.log("REQ HEADERS:", req.headers);
-
+    // Get the authorization header
     const authHeader = req.headers?.authorization;
-    if (!authHeader) return next(createHttpError.Unauthorized("Authorization header missing"));
+    if (!authHeader) {
+      console.error("Authorization header missing");
+      return next(createHttpError.Unauthorized("Authorization header missing"));
+    }
 
+    // Extract the token
     const token = authHeader.split(" ")[1];
-    if (!token) return next(createHttpError.Unauthorized("Bearer token missing"));
+    if (!token) {
+      console.error("Bearer token missing");
+      return next(createHttpError.Unauthorized("Bearer token missing"));
+    }
 
-    const { data, error } = await supabase.auth.getUser(token);
-    const user = data?.user;
+    // First verify the token directly
+    const {
+      data: { user: sessionUser },
+      error: sessionError,
+    } = await supabase.auth.getUser(token);
 
-    if (error || !user) return next(createHttpError.Unauthorized("Invalid token or user not found"));
+    if (sessionError) {
+      console.error("Session error:", sessionError);
+      return next(createHttpError.Unauthorized("Invalid token"));
+    }
 
-    req.user = user;
+    if (!sessionUser) {
+      console.error("User not found in session");
+      return next(createHttpError.Unauthorized("User not found"));
+    }
+
+    // Add the user and token to the request for downstream use
+    req.user = sessionUser;
+    req.token = token;
+
     next();
   } catch (err) {
     console.error("Auth middleware unexpected error:", err);

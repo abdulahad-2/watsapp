@@ -26,6 +26,18 @@ function App() {
   const { user } = useSelector((state) => state.user);
   const { token } = user;
 
+  // Listen for 401 errors and handle them smoothly
+  useEffect(() => {
+    if (
+      !token &&
+      window.location.pathname !== "/login" &&
+      window.location.pathname !== "/register"
+    ) {
+      // Use react-router's navigate instead of window.location for smoother transitions
+      window.location.href = "/login";
+    }
+  }, [token]);
+
   return React.createElement(
     "div",
     { className: "dark" },
@@ -34,7 +46,12 @@ function App() {
       { value: socket },
       React.createElement(
         Router,
-        null,
+        {
+          future: {
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          },
+        },
         React.createElement(
           Routes,
           null,

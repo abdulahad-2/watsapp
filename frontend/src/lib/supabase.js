@@ -1,13 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Debug logging for environment variables
-console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
-console.log(
-  "Supabase Key:",
-  import.meta.env.VITE_SUPABASE_ANON_KEY ? "Loaded ✅" : "MISSING ❌"
-);
-console.log("All env variables:", import.meta.env);
-
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -15,74 +7,21 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-// Function to safely access environment variables
-const getEnvVar = (key) => {
-  const value = import.meta.env[key];
-  if (!value) {
-    console.warn(`Missing environment variable: ${key}`);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+  },
+});
+
+// Log initial session for debugging
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    console.log("Initial session found:", session);
+  } else {
+    console.log("No initial session found");
   }
-  return value;
-};
-
-// Create a function to initialize the client with retries
-const createSupabaseClient = () => {
-  let retries = 0;
-  const maxRetries = 3;
-
-  const initialize = () => {
-    try {
-      if (!window) {
-        console.warn("Window object not available");
-        return null;
-      }
-
-      const options = {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: false,
-          storage: window.localStorage,
-          storageKey: "watsapp_auth",
-        },
-        global: {
-          fetch: (...args) => fetch(...args),
-          headers: { "x-application-name": "watsapp" },
-        },
-      };
-
-      const client = createClient(supabaseUrl, supabaseKey, options);
-
-      // Test the client
-      client.auth.getSession().catch((err) => {
-        console.warn("Initial session check failed:", err);
-      });
-
-      return client;
-    } catch (error) {
-      console.error(
-        `Supabase client initialization attempt ${retries + 1} failed:`,
-        error
-      );
-
-      if (retries < maxRetries) {
-        retries++;
-        return initialize();
-      }
-
-      console.error(
-        "Failed to initialize Supabase client after",
-        maxRetries,
-        "attempts"
-      );
-      return null;
-    }
-  };
-
-  return initialize();
-};
-
-// Initialize the client
-const supabase = createSupabaseClient();
+});
 
 export { supabase };
 

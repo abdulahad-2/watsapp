@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { auth } from "../lib/supabase";
+import { auth } from "../services/auth.service";
 
 const initialState = {
   status: "",
@@ -18,27 +18,26 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (values, { rejectWithValue }) => {
     try {
-      const { data, error } = await auth.signUp(
-        values.email,
-        values.password,
-        {
-          name: values.name,
-          picture: values.picture || import.meta.env.VITE_DEFAULT_PICTURE,
-          status: values.status || import.meta.env.VITE_DEFAULT_STATUS,
-        }
-      );
-      
-      if (error) throw error;
-      
+      const response = await auth.register({
+        ...values,
+        picture: values.picture || import.meta.env.VITE_DEFAULT_PICTURE,
+        status: values.status || import.meta.env.VITE_DEFAULT_STATUS,
+      });
+      console.log("Register response:", response);
+
+      if (!response.token) {
+        throw new Error("No token received from server");
+      }
+
       return {
         user: {
-          id: data.user.id,
-          name: data.user.user_metadata.name,
-          email: data.user.email,
-          picture: data.user.user_metadata.picture,
-          status: data.user.user_metadata.status,
-          token: data.session?.access_token,
-        }
+          id: response.user._id,
+          name: response.user.name,
+          email: response.user.email,
+          picture: response.user.picture,
+          status: response.user.status,
+          token: response.token,
+        },
       };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -50,19 +49,22 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (values, { rejectWithValue }) => {
     try {
-      const { data, error } = await auth.signIn(values.email, values.password);
-      
-      if (error) throw error;
-      
+      const response = await auth.login(values);
+      console.log("Auth response:", response);
+
+      if (!response.token) {
+        throw new Error("No token received from server");
+      }
+
       return {
         user: {
-          id: data.user.id,
-          name: data.user.user_metadata.name,
-          email: data.user.email,
-          picture: data.user.user_metadata.picture,
-          status: data.user.user_metadata.status,
-          token: data.session?.access_token,
-        }
+          id: response.user._id,
+          name: response.user.name,
+          email: response.user.email,
+          picture: response.user.picture,
+          status: response.user.status,
+          token: response.token,
+        },
       };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -74,8 +76,7 @@ export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const { error } = await auth.signOut();
-      if (error) throw error;
+      await auth.logout();
       return {};
     } catch (error) {
       return rejectWithValue(error.message);

@@ -1,13 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../lib/axiosConfig";
 
-// Ye tera backend link hai jo Render pe chal raha hai
-const API_BASE_URL = "https://watsapp-backend-mscv.onrender.com";
-
-// Ab isi se endpoints bana le
-const CONVERSATION_ENDPOINT = `${API_BASE_URL}/api/v1/conversation`;
-const MESSAGE_ENDPOINT = `${API_BASE_URL}/api/v1/message`;
-
+// API endpoints
+const CONVERSATION_ENDPOINT = "conversation";
+const MESSAGE_ENDPOINT = "message";
 
 const initialState = {
   status: "",
@@ -24,11 +20,7 @@ export const getConversations = createAsyncThunk(
   "conervsation/all",
   async (token, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(CONVERSATION_ENDPOINT, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data } = await api.get(CONVERSATION_ENDPOINT);
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -40,15 +32,11 @@ export const open_create_conversation = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     const { token, receiver_id, isGroup, convo_id } = values;
     try {
-      const { data } = await axios.post(
-        CONVERSATION_ENDPOINT,
-        { receiver_id, isGroup, convo_id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const { data } = await api.post(CONVERSATION_ENDPOINT, {
+        receiver_id,
+        isGroup,
+        convo_id,
+      });
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -60,11 +48,7 @@ export const getConversationMessages = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     const { token, convo_id } = values;
     try {
-      const { data } = await axios.get(`${MESSAGE_ENDPOINT}/${convo_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data } = await api.get(`${MESSAGE_ENDPOINT}/${convo_id}`);
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -76,19 +60,11 @@ export const sendMessage = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     const { token, message, convo_id, files } = values;
     try {
-      const { data } = await axios.post(
-        MESSAGE_ENDPOINT,
-        {
-          message,
-          convo_id,
-          files,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const { data } = await api.post(MESSAGE_ENDPOINT, {
+        message,
+        convo_id,
+        files,
+      });
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -100,15 +76,10 @@ export const createGroupConversation = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     const { token, name, users } = values;
     try {
-      const { data } = await axios.post(
-        `${CONVERSATION_ENDPOINT}/group`,
-        { name, users },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const { data } = await api.post(`${CONVERSATION_ENDPOINT}/group`, {
+        name,
+        users,
+      });
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -121,15 +92,9 @@ export const deleteMessage = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     const { token, messageId, convo_id } = values;
     try {
-      await axios.delete(
-        `${MESSAGE_ENDPOINT}/${messageId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          data: { convo_id }
-        }
-      );
+      await api.delete(`${MESSAGE_ENDPOINT}/${messageId}`, {
+        data: { convo_id },
+      });
       return { messageId, convo_id };
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -142,14 +107,9 @@ export const starMessage = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     const { token, messageId } = values;
     try {
-      const { data } = await axios.patch(
+      const { data } = await api.patch(
         `${MESSAGE_ENDPOINT}/${messageId}/star`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        {}
       );
       return data;
     } catch (error) {
@@ -195,13 +155,16 @@ export const chatSlice = createSlice({
     },
     removeMessage: (state, action) => {
       const { messageId, convo_id } = action.payload;
-      state.messages = state.messages.filter(msg => msg._id !== messageId);
-      
+      state.messages = state.messages.filter((msg) => msg._id !== messageId);
+
       // Update conversation's latest message if needed
-      let conversation = state.conversations.find(c => c._id === convo_id);
+      let conversation = state.conversations.find((c) => c._id === convo_id);
       if (conversation && conversation.latestMessage?._id === messageId) {
-        const remainingMessages = state.messages.filter(msg => msg.conversation._id === convo_id);
-        conversation.latestMessage = remainingMessages[remainingMessages.length - 1] || null;
+        const remainingMessages = state.messages.filter(
+          (msg) => msg.conversation._id === convo_id
+        );
+        conversation.latestMessage =
+          remainingMessages[remainingMessages.length - 1] || null;
       }
     },
   },
@@ -268,7 +231,7 @@ export const chatSlice = createSlice({
       .addCase(deleteMessage.fulfilled, (state, action) => {
         state.status = "succeeded";
         const { messageId } = action.payload;
-        state.messages = state.messages.filter(msg => msg._id !== messageId);
+        state.messages = state.messages.filter((msg) => msg._id !== messageId);
       })
       .addCase(deleteMessage.rejected, (state, action) => {
         state.status = "failed";
@@ -283,7 +246,9 @@ export const chatSlice = createSlice({
           (c) => c._id === convo_id
         );
         if (conversation) {
-          const message = conversation.messages.find((m) => m._id === messageId);
+          const message = conversation.messages.find(
+            (m) => m._id === messageId
+          );
           if (message) {
             message.starred = isStarred;
           }

@@ -8,8 +8,13 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    include: ["@supabase/supabase-js"],
+    include: ["@supabase/supabase-js", "simple-peer"],
     exclude: ["@supabase/gotrue-js"],
+    esbuildOptions: {
+      define: {
+        global: "globalThis",
+      },
+    },
   },
   build: {
     commonjsOptions: {
@@ -17,6 +22,7 @@ export default defineConfig({
     },
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -25,12 +31,21 @@ export default defineConfig({
           "redux-vendor": ["@reduxjs/toolkit", "react-redux"],
           "socket-vendor": ["socket.io-client"],
         },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name.endsWith(".css")) {
+            return "assets/styles.[hash][extname]";
+          }
+          return "assets/[name]-[hash][extname]";
+        },
       },
     },
   },
   resolve: {
     alias: {
       "./runtimeConfig": "./runtimeConfig.browser",
+      util: "rollup-plugin-node-polyfills/polyfills/util",
+      stream: "rollup-plugin-node-polyfills/polyfills/stream",
+      events: "rollup-plugin-node-polyfills/polyfills/events",
     },
   },
   server: {
