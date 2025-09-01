@@ -1,69 +1,73 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Ensure environment variables are available
-const getSupabaseConfig = () => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing Supabase environment variables:", {
-      url: !!supabaseUrl,
-      key: !!supabaseKey,
-    });
-    throw new Error("Missing Supabase environment variables");
+class SupabaseClientSingleton {
+  constructor() {
+    if (SupabaseClientSingleton.instance) {
+      return SupabaseClientSingleton.instance;
+    }
+    SupabaseClientSingleton.instance = this;
+    this.client = null;
   }
 
-  return { supabaseUrl, supabaseKey };
-};
+  initialize() {
+    if (this.client) {
+      return this.client;
+    }
 
-// Create client with explicit options
-const createSupabaseClient = () => {
-  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-  const options = {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-    global: {
-      headers: {
-        "x-client-info": "whatsapp-frontend@1.0.0",
-      },
-    },
-  };
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error(
+        `Missing environment variables: URL=${!!supabaseUrl}, KEY=${!!supabaseKey}`
+      );
+    }
 
-  return createClient(supabaseUrl, supabaseKey, options);
-};
+    try {
+      this.client = createClient(supabaseUrl, supabaseKey, {
+        db: {
+          schema: "public",
+        },
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+        },
+      });
 
-// Initialize client with error handling
-let supabaseClient = null;
-
-try {
-  supabaseClient = createSupabaseClient();
-} catch (error) {
-  console.error("Failed to initialize Supabase client:", error);
-  // Provide a more detailed error for debugging
-  if (error.message.includes("headers")) {
-    console.error(
-      "Headers initialization failed. Check that all required configurations are loaded."
-    );
+      return this.client;
+    } catch (error) {
+      console.error("Supabase client initialization error:", error);
+      throw error;
+    }
   }
-  throw error;
+
+  getClient() {
+    if (!this.client) {
+      return this.initialize();
+    }
+    return this.client;
+  }
 }
 
-export const supabase = supabaseClient;
+const supabaseInstance = new SupabaseClientSingleton();
+export const supabase = supabaseInstance.getClient();
 
 // Auth helpers
 export const auth = {
   signUp: async (email, password, metadata) => {
-    const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: { data: metadata },
-    });
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: metadata },
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Auth signup error:", error);
+      throw error;
+    }
   },
 
   signIn: async (email, password) => {
