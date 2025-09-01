@@ -4,6 +4,17 @@ import { createClient } from "@supabase/supabase-js";
 console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
 console.log("Supabase Key loaded?", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
 
+const supabaseOptions = {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+  },
+  global: {
+    headers: { "x-application-name": "watsapp" },
+  },
+};
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -11,13 +22,8 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    storage: typeof window !== "undefined" ? localStorage : undefined,
-  },
-});
+// Create and export the Supabase client
+export const supabase = createClient(supabaseUrl, supabaseKey, supabaseOptions);
 
 // Initialize session handling
 const initializeSession = async () => {
