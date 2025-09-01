@@ -1,47 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 
-let supabaseInstance = null;
+// Basic environment variable checks
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const createSupabaseClient = () => {
-  if (supabaseInstance) {
-    return supabaseInstance;
-  }
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Environment variables check:", {
+    url: !!supabaseUrl,
+    key: !!supabaseKey,
+  });
+  throw new Error("Missing Supabase environment variables");
+}
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error(
-      `Missing Supabase environment variables: URL=${!!supabaseUrl}, KEY=${!!supabaseKey}`
-    );
-  }
-
-  const headers = {
-    "X-Client-Info": "supabase-js/2.56.0",
-  };
-
-  const options = {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: "whatsapp-auth-token",
-    },
-    global: {
-      headers,
-    },
-  };
-
-  try {
-    supabaseInstance = createClient(supabaseUrl, supabaseKey, options);
-    return supabaseInstance;
-  } catch (error) {
-    console.error("Failed to initialize Supabase client:", error);
-    throw error;
-  }
-};
-
-export const supabase = createSupabaseClient();
+// Create the client with basic auth configuration
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+  },
+});
 
 // Auth helpers with retry mechanism
 const withRetry = async (operation, maxRetries = 3) => {
@@ -109,49 +86,53 @@ export const db = {
 
   // Conversations
   getUserConversations: (userId) =>
-    supabaseClient
-      .from("conversations")
-      .select(
+    withRetry(() =>
+      supabase
+        .from("conversations")
+        .select(
+          `
+          *,
+          conversation_users!inner(user_id),
+          users:conversation_users(users(*)),
+          messages:latest_message_id(*)
         `
-        *,
-        conversation_users!inner(user_id),
-        users:conversation_users(users(*)),
-        messages:latest_message_id(*)
-      `
-      )
-      .eq("conversation_users.user_id", userId)
-      .order("updated_at", { ascending: false }),
+        )
+        .eq("conversation_users.user_id", userId)
+        .order("updated_at", { ascending: false })
+    ),
 
   createConversation: (conversationData, userIds) =>
-    supabaseClient.rpc("create_conversation_with_users", {
-      conversation_data: conversationData,
-      user_ids: userIds,
-    }),
+    withRetry(() =>
+      supabase.rpc("create_conversation_with_users", {
+        conversation_data: conversationData,
+        user_ids: userIds,
+      })
+    ),
 
   // Messages
   getConversationMessages: (conversationId) =>
-    supabaseClient
-      .from("messages")
-      .select(
-        `
-        *,
-        sender:users(*)
-      `
-      )
-      .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true }),
+    withRetry(() =>
+      supabase
+        .from("messages")
+        .select(`*, sender:users(*)`)
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: true })
+    ),
 
   sendMessage: (messageData) =>
-    supabaseClient.from("messages").insert(messageData).select().single(),
+    withRetry(() =>
+      supabase.from("messages").insert(messageData).select().single()
+    ),
 
   deleteMessage: (messageId) =>
-    supabaseClient
-      .from("messages")
-      .update({ deleted: true })
-      .eq("id", messageId),
+    withRetry(() =>
+      supabase.from("messages").update({ deleted: true }).eq("id", messageId)
+    ),
 
   starMessage: (messageId, starred) =>
-    supabaseClient.from("messages").update({ starred }).eq("id", messageId),
+    withRetry(() =>
+      supabase.from("messages").update({ starred }).eq("id", messageId)
+    ),
 };
 
 // Real-time subscriptions with auto-reconnect
