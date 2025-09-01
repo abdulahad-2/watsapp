@@ -11,33 +11,139 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
+    storage: localStorage,
+    storageKey: "supabase.auth.token",
   },
+  headers: {
+    "Content-Type": "application/json",
+  },
+  persistSession: true,
+  detectSessionInUrl: true,
 });
 
-// Log initial session for debugging
-supabase.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    console.log("Initial session found:", session);
-  } else {
-    console.log("No initial session found");
+// Initialize session handling
+const initializeSession = async () => {
+  try {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("Error getting session:", error.message);
+      return null;
+    }
+
+    if (session) {
+      console.log("Initial session found");
+      // Set up session refresh
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_OUT") {
+          console.log("User signed out");
+        } else if (event === "SIGNED_IN") {
+          console.log("User signed in");
+        } else if (event === "TOKEN_REFRESHED") {
+          console.log("Session refreshed");
+        }
+      });
+      return session;
+    } else {
+      console.log("No initial session found");
+      return null;
+    }
+  } catch (err) {
+    console.error("Session initialization error:", err);
+    return null;
   }
-});
+};
+
+// Initialize session
+initializeSession();
 
 export { supabase };
 
 // Auth helpers
 export const auth = {
-  signUp: (email, password, metadata) =>
-    supabase.auth.signUp({ email, password, options: { data: metadata } }),
+  signUp: async (email, password, metadata) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-  signIn: (email, password) =>
-    supabase.auth.signInWithPassword({ email, password }),
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Sign up error:", error.message);
+      throw error;
+    }
+  },
 
-  signOut: () => supabase.auth.signOut(),
+  signIn: async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  getUser: () => supabase.auth.getUser(),
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Sign in error:", error.message);
+      throw error;
+    }
+  },
 
-  onAuthStateChange: (callback) => supabase.auth.onAuthStateChange(callback),
+  signOut: async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error("Sign out error:", error.message);
+      throw error;
+    }
+  },
+
+  getUser: async () => {
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    } catch (error) {
+      console.error("Get user error:", error.message);
+      throw error;
+    }
+  },
+
+  onAuthStateChange: (callback) => {
+    try {
+      return supabase.auth.onAuthStateChange(callback);
+    } catch (error) {
+      console.error("Auth state change subscription error:", error.message);
+      throw error;
+    }
+  },
+
+  refreshSession: async () => {
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.refreshSession();
+      if (error) throw error;
+      return session;
+    } catch (error) {
+      console.error("Session refresh error:", error.message);
+      throw error;
+    }
+  },
 };
 
 // Database helpers
