@@ -15,10 +15,10 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // ------------------------
-// 🔥 Debug: Supabase client options
+// 🔥 Correct client options
 // ------------------------
 const supabaseOptions = {
-  global: { headers: {} }, // ensures 'headers' exists
+  global: { headers: {} }, // MUST be 'global', not 'globalThis'
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -26,9 +26,10 @@ const supabaseOptions = {
 };
 
 console.log("Debug: Supabase client options ->", supabaseOptions);
+console.log("Debug: Keys in options ->", Object.keys(supabaseOptions));
 
 // ------------------------
-// 🔥 Create the Supabase client
+// 🔥 Create Supabase client
 // ------------------------
 let supabase;
 try {
@@ -39,7 +40,9 @@ try {
   throw err;
 }
 
+// ------------------------
 // 🔹 Retry helper
+// ------------------------
 const withRetry = async (operation, maxRetries = 3) => {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
@@ -62,8 +65,8 @@ const withRetry = async (operation, maxRetries = 3) => {
 // 🔹 Auth helpers
 // ------------------------
 export const auth = {
-  signUp: async (email, password, metadata) => {
-    return withRetry(async () => {
+  signUp: async (email, password, metadata) =>
+    withRetry(async () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -71,19 +74,17 @@ export const auth = {
       });
       if (error) throw error;
       return data;
-    });
-  },
+    }),
 
-  signIn: async (email, password) => {
-    return withRetry(async () => {
+  signIn: async (email, password) =>
+    withRetry(async () => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
       return data;
-    });
-  },
+    }),
 
   signOut: () => supabase.auth.signOut(),
   getUser: () => supabase.auth.getUser(),
@@ -94,7 +95,6 @@ export const auth = {
 // 🔹 Database helpers
 // ------------------------
 export const db = {
-  // Users
   getUser: (id) =>
     withRetry(() => supabase.from("users").select("*").eq("id", id).single()),
   updateUser: (id, updates) =>
@@ -104,7 +104,6 @@ export const db = {
       supabase.from("users").select("*").ilike("name", `%${query}%`)
     ),
 
-  // Conversations
   getUserConversations: (userId) =>
     withRetry(() =>
       supabase
@@ -129,7 +128,6 @@ export const db = {
       })
     ),
 
-  // Messages
   getConversationMessages: (conversationId) =>
     withRetry(() =>
       supabase
@@ -156,7 +154,7 @@ export const db = {
 };
 
 // ------------------------
-// 🔹 Realtime subscriptions
+// 🔹 Realtime helpers
 // ------------------------
 export const realtime = {
   createChannel: (name, table, filter, callback) => {
@@ -164,12 +162,7 @@ export const realtime = {
       .channel(name)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table,
-          filter,
-        },
+        { event: "*", schema: "public", table, filter },
         callback
       )
       .subscribe((status) => {
@@ -212,7 +205,7 @@ export const realtime = {
 };
 
 // ------------------------
-// 🔹 Debug: Test function to verify client works
+// 🔹 Test function
 // ------------------------
 export const testSupabaseConnection = async () => {
   try {
@@ -225,6 +218,6 @@ export const testSupabaseConnection = async () => {
 };
 
 // ------------------------
-// 🔹 Export Supabase client and retry helper
+// 🔹 Export client
 // ------------------------
 export { supabase, withRetry };
