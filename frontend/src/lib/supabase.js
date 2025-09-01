@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // ------------------------
-// Environment variables
+// Static Supabase URL & Key
 // ------------------------
 const supabaseUrl = "https://cwbobklimbexftagrouh.supabase.co";
 const supabaseKey =
@@ -12,39 +12,21 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // ------------------------
-// Forcefully fix options to prevent 'headers undefined'
+// Create Supabase client
 // ------------------------
-let supabaseOptions = {
-  global: { headers: {} },
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  global: {
+    headers: {}, // must exist to prevent 'headers undefined'
+    fetch: fetch, // force browser fetch for deployment
+  },
   auth: {
     autoRefreshToken: true,
     persistSession: true,
   },
-};
-
-// // If bundler renamed `global` to `globalThis`, fix it
-// if (!supabaseOptions.global && supabaseOptions.globalThis) {
-//   console.warn(
-//     "⚠️ globalThis found, renaming to global to prevent 'headers' error"
-//   );
-//   supabaseOptions.global = supabaseOptions.globalThis;
-//   delete supabaseOptions.globalThis;
-// }
+});
 
 // ------------------------
-// Create Supabase client
-// ------------------------
-let supabase;
-try {
-  supabase = createClient(supabaseUrl, supabaseKey);
-  console.log("Supabase client created successfully ✅");
-} catch (err) {
-  console.error("🔥 Error creating Supabase client:", err);
-  throw err;
-}
-
-// ------------------------
-// Retry helper
+// Retry helper for DB/auth operations
 // ------------------------
 const withRetry = async (operation, maxRetries = 3) => {
   let lastError;
