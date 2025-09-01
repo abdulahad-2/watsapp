@@ -12,8 +12,9 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-// Create the client with basic auth configuration
+// Create the client with global headers to avoid undefined error
 export const supabase = createClient(supabaseUrl, supabaseKey, {
+  global: { headers: {} }, // <- Fix here
   auth: {
     autoRefreshToken: true,
     persistSession: true,
