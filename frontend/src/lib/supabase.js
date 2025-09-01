@@ -12,7 +12,6 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     autoRefreshToken: true,
     persistSession: true,
     storage: localStorage,
-    storageKey: "supabase.auth.token",
   },
 });
 
