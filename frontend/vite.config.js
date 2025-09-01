@@ -31,12 +31,14 @@ export default defineConfig({
           "redux-vendor": ["@reduxjs/toolkit", "react-redux"],
           "socket-vendor": ["socket.io-client"],
         },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name.endsWith(".css")) {
-            return "assets/styles.[hash][extname]";
-          }
-          return "assets/[name]-[hash][extname]";
-        },
+      },
+    },
+    css: {
+      modules: {
+        localsConvention: "camelCase",
+      },
+      postcss: {
+        plugins: [require("tailwindcss"), require("autoprefixer")],
       },
     },
   },
