@@ -14,11 +14,6 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     storage: localStorage,
     storageKey: "supabase.auth.token",
   },
-  headers: {
-    "Content-Type": "application/json",
-  },
-  persistSession: true,
-  detectSessionInUrl: true,
 });
 
 // Initialize session handling
