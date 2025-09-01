@@ -1,18 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 
+// Debug logs for environment variables
+console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+console.log("Supabase Key loaded?", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Supabase Configuration:", {
-    url: supabaseUrl ? "Available" : "Missing",
-    key: supabaseKey ? "Available" : "Missing",
-  });
   throw new Error("Missing Supabase environment variables");
 }
 
-// Create the Supabase client
-const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    storage: typeof window !== "undefined" ? localStorage : undefined,
+  },
+});
 
 // Initialize session handling
 const initializeSession = async () => {
