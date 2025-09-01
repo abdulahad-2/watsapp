@@ -4,16 +4,15 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
+  console.error("Supabase Configuration:", {
+    url: supabaseUrl ? "Available" : "Missing",
+    key: supabaseKey ? "Available" : "Missing",
+  });
   throw new Error("Missing Supabase environment variables");
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    storage: localStorage,
-  },
-});
+// Create the Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize session handling
 const initializeSession = async () => {
