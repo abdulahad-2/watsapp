@@ -7,9 +7,14 @@ export default defineConfig({
       jsxRuntime: "automatic", // This allows JSX without React import
     }),
   ],
-  // Add favicon configuration
   optimizeDeps: {
     include: ["@supabase/supabase-js"],
+    exclude: ["@supabase/gotrue-js"],
+  },
+  resolve: {
+    alias: {
+      "./runtimeConfig": "./runtimeConfig.browser",
+    },
   },
   server: {
     port: 3000,
