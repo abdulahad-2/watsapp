@@ -58,8 +58,6 @@ const initializeSession = async () => {
 // Initialize session
 initializeSession();
 
-export { supabase };
-
 // Auth helpers
 export const auth = {
   signUp: async (email, password, metadata) => {
