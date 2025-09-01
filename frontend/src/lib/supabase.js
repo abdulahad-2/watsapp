@@ -19,12 +19,11 @@ try {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+      storageKey: "watsapp_auth",
+      storage: window.localStorage,
     },
-    global: {
-      headers: {
-        pragma: "no-cache",
-        "cache-control": "no-cache",
-      },
+    headers: {
+      "x-client-info": "watsapp-frontend",
     },
     realtime: {
       params: {

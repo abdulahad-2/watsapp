@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PulseLoader from "react-spinners/PulseLoader";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../features/userSlice";
-import { supabase, auth, db, realtime } from '../../lib/supabase';
+import { supabase, auth, db, realtime } from "../../lib/supabase";
 
 export default function RegisterForm() {
   const dispatch = useDispatch();
@@ -47,10 +47,12 @@ export default function RegisterForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
           <AuthInput
             name="email"
-            type="text"
+            type="email"
             placeholder="Email address"
             register={register}
             error={errors?.email?.message}
+            autoComplete="username"
+            aria-label="Email address"
           />
           <AuthInput
             name="password"
@@ -58,6 +60,9 @@ export default function RegisterForm() {
             placeholder="Password"
             register={register}
             error={errors?.password?.message}
+            autoComplete="current-password"
+            aria-label="Password"
+            minLength={8}
           />
 
           {/* Error */}

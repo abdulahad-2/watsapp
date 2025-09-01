@@ -1,10 +1,13 @@
-import React from 'react';
+import React from "react";
 export default function AuthInput({
   name,
   type,
   placeholder,
   register,
   error,
+  autoComplete,
+  "aria-label": ariaLabel,
+  minLength,
 }) {
   return (
     <div className="mt-8 content-center dark:text-dark_text_1 space-y-1">
@@ -15,7 +18,12 @@ export default function AuthInput({
         className="w-full dark:bg-dark_bg_3 text-base py-2 px-4 rounded-lg outline-none"
         type={type}
         placeholder={placeholder}
+        autoComplete={autoComplete}
+        aria-label={ariaLabel}
+        minLength={minLength}
         {...register(name)}
+        spellCheck="false"
+        autoCapitalize="none"
       />
       {error && <p className="text-red-400">{error}</p>}
     </div>
