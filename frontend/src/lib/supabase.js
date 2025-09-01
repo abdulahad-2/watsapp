@@ -14,23 +14,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 let supabase;
 
 try {
-  supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-      storageKey: "watsapp_auth",
-      storage: window.localStorage,
-    },
-    headers: {
-      "x-client-info": "watsapp-frontend",
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 10,
+  if (typeof window !== "undefined") {
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storageKey: "watsapp_auth",
+        storage: window.localStorage,
+        persistSession: true,
+        detectSessionInUrl: true,
+        autoRefreshToken: true,
       },
-    },
-  });
+    });
+  }
 } catch (error) {
   console.error("[Supabase] Error initializing client:", error);
   // Potentially re-throw or handle the error gracefully based on application needs
