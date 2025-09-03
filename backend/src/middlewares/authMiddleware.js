@@ -1,17 +1,18 @@
 // backend/src/middleware/authMiddleware.js
+import 'dotenv/config'; // Add this line to ensure env vars are loaded
 import createHttpError from "http-errors";
 import { createClient } from "@supabase/supabase-js";
 
 // Supabase config
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY; // ✅ Use anon key for auth
+const SUPABASE_KEY = process.env.SUPABASE_KEY; // Renamed to SUPABASE_KEY for direct use
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error("❌ Missing Supabase config: SUPABASE_URL or SUPABASE_ANON_KEY");
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error("❌ Missing Supabase config: SUPABASE_URL or SUPABASE_KEY");
 }
 
 // Create Supabase client (anon key, safe for token verification)
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Middleware
 export default async function authMiddleware(req, res, next) {

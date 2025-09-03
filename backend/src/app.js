@@ -1,5 +1,4 @@
 import express from "express";
-import dotenv from "dotenv";
 import morgan from "morgan";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -8,9 +7,6 @@ import fileUpload from "express-fileupload";
 import cors from "cors";
 import createHttpError from "http-errors";
 import routes from "./routes/index.js";
-
-// Load env variables
-dotenv.config();
 
 const app = express();
 
