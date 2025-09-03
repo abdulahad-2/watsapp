@@ -20,6 +20,7 @@ export const createUser = async (userData) => {
   if (!name || !email || !password) {
     throw createHttpError.BadRequest("Please fill all fields.");
   }
+  console.log("Backend received name for validation:", name, "Length:", name.length);
 
   //check name length
   if (
