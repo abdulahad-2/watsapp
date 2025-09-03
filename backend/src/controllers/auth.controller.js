@@ -2,6 +2,7 @@ import createHttpError from "http-errors";
 import { createUser, signUser } from "../services/auth.service.js";
 import { generateToken, verifyToken } from "../services/token.service.js";
 import { findUser } from "../services/user.service.js";
+import logger from "../configs/logger.config.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -46,6 +47,7 @@ export const register = async (req, res, next) => {
   }
 };
 export const login = async (req, res, next) => {
+  logger.info("Login attempt received.");
   try {
     const { email, password } = req.body;
     const user = await signUser(email, password);
