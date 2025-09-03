@@ -1,7 +1,7 @@
 import createHttpError from "http-errors";
 import validator from "validator";
 import { createClient } from '@supabase/supabase-js';
-import logger from "../utils/logger";
+import logger from "../configs/logger.config.js";
 
 //env variables
 const { DEFAULT_PICTURE, DEFAULT_STATUS, SUPABASE_URL } = process.env;
