@@ -86,12 +86,12 @@ export default function RegisterForm() {
             error={errors?.email?.message}
           />
           <AuthInput
-  name="about"
-  type="text"
-  placeholder="Status (Optional)"
-  register={register}
-  error={errors?.about?.message}
-/>
+            name="status"
+            type="text"
+            placeholder="Status (Optional)"
+            register={register}
+            error={errors?.status?.message}
+          />
 
           <AuthInput
             name="password"
