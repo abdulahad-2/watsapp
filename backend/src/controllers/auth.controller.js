@@ -1,10 +1,6 @@
 import createHttpError from "http-errors";
 import { createUser, signUser } from "../services/auth.service.js";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-} from "../services/token.service.js";
+import { generateToken, verifyToken } from "../services/token.service.js"; // Corrected imports
 import { findUser } from "../services/user.service.js";
 import logger from "../configs/logger.config.js";
 
@@ -22,8 +18,8 @@ export const register = async (req, res, next) => {
     });
 
     // Generate tokens
-    const access_token = await generateAccessToken({ userId: newUser._id });
-    const refresh_token = await generateRefreshToken({ userId: newUser._id });
+    const access_token = await generateToken({ userId: newUser._id }, "1d", process.env.ACCESS_TOKEN_SECRET); // Corrected call
+    const refresh_token = await generateToken({ userId: newUser._id }, "30d", process.env.REFRESH_TOKEN_SECRET); // Corrected call
 
     // ✅ Cookie set (no bullshit path)
     res.cookie("refreshtoken", refresh_token, {
@@ -61,8 +57,8 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await signUser(email, password);
 
-    const access_token = await generateAccessToken({ userId: user._id });
-    const refresh_token = await generateRefreshToken({ userId: user._id });
+    const access_token = await generateToken({ userId: user._id }, "1d", process.env.ACCESS_TOKEN_SECRET); // Corrected call
+    const refresh_token = await generateToken({ userId: user._id }, "30d", process.env.REFRESH_TOKEN_SECRET); // Corrected call
 
     res.cookie("refreshtoken", refresh_token, {
       httpOnly: true,
@@ -105,12 +101,12 @@ export const refreshToken = async (req, res, next) => {
     const refresh_token = req.cookies.refreshtoken;
     if (!refresh_token) throw createHttpError.Unauthorized("Please login.");
 
-    const check = await verifyRefreshToken(refresh_token);
+    const check = await verifyToken(refresh_token, process.env.REFRESH_TOKEN_SECRET); // Corrected call
     if (!check) throw createHttpError.Unauthorized("Invalid refresh token.");
 
     const user = await findUser(check.userId);
 
-    const access_token = await generateAccessToken({ userId: user._id });
+    const access_token = await generateToken({ userId: user._id }, "1d", process.env.ACCESS_TOKEN_SECRET); // Corrected call
 
     res.json({
       user: {

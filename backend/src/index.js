@@ -3,7 +3,6 @@ import { Server } from "socket.io";
 import app from "./app.js";
 import logger from "./configs/logger.config.js";
 import SocketServer from "./SocketServer.js";
-import allowedOrigins from "./configs/allowedOrigins.js";
 
 // Env variables
 const PORT = process.env.PORT || 5000;
@@ -11,6 +10,15 @@ const PORT = process.env.PORT || 5000;
 let server = app.listen(PORT, () => {
   logger.info(`🚀 Server is listening at ${PORT}`);
 });
+
+// Allowed Origins for Socket.io
+const allowedOrigins = [
+  process.env.CLIENT_ENDPOINT || "http://localhost:3000",
+  "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
+  "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
+  "https://chatapp-rho-six.vercel.app",
+  "https://watsapp-mu.vercel.app",
+];
 
 // Socket.io setup
 const io = new Server(server, {

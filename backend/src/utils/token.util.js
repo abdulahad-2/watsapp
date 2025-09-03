@@ -1,4 +1,5 @@
-import { sign, verify } from "../utils/token.util.js";
+import pkg from 'jsonwebtoken';
+const { sign, verify } = pkg;
 
 // Access token generate
 export const generateAccessToken = async (payload) => {
