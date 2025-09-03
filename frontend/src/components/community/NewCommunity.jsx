@@ -25,7 +25,7 @@ export default function NewCommunity({ setShowNewCommunity }) {
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_ENDPOINT || "http://localhost:5000"}/api/v1/community`,
+        `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/community`,
         {
           method: "POST",
           headers: {

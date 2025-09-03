@@ -15,7 +15,7 @@ export default function CallTimes({
       setSecInCall();
     }
     return () => setTotalSecInCall(0);
-  }, [callAccepted]);
+  }, [callAccepted, setTotalSecInCall]);
   return (
     <div
       className={`text-dark_text_2 ${

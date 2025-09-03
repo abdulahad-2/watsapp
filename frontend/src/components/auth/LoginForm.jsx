@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import PulseLoader from "react-spinners/PulseLoader";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../features/userSlice";
-import { supabase, auth, db, realtime } from "../../lib/supabase";
 
 export default function RegisterForm() {
   const dispatch = useDispatch();

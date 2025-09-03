@@ -15,7 +15,7 @@ export default function CreateGroup({ setShowCreateGroup }) {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
 
-  const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || "http://localhost:5000";
+  const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000";
 
   const handleSearch = async (e) => {
     if (e.target.value && e.key === "Enter") {

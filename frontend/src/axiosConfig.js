@@ -3,7 +3,7 @@ import { store } from "./app/store";
 import { logout, setUser } from "./features/userSlice";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_ENDPOINT,
+  baseURL: process.env.REACT_APP_API_ENDPOINT,
   withCredentials: true,
 });
 

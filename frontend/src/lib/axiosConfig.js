@@ -1,9 +1,9 @@
 import axios from "axios";
-import { getToken, dispatch, getState } from "./storeAccess";
+import { getToken, dispatch } from "./storeAccess";
 
 // Create an axios instance with custom config
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_ENDPOINT,
+  baseURL: process.env.REACT_APP_API_ENDPOINT,
   headers: {
     "Content-Type": "application/json",
   },

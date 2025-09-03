@@ -1,6 +1,6 @@
 export async function getProtectedData(userToken) {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/protected`, {
+      const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/api/protected`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

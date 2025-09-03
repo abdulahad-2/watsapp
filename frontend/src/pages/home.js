@@ -32,7 +32,7 @@ function Home({ socket }) {
   const [call, setCall] = useState(callData);
   const [stream, setStream] = useState();
   const [show, setShow] = useState(false);
-  const { receiveingCall, callEnded, socketId } = call;
+  const { socketId } = call;
   const [callAccepted, setCallAccepted] = useState(false);
   const [totalSecInCall, setTotalSecInCall] = useState(0);
   const myVideo = useRef();

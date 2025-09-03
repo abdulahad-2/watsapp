@@ -2,23 +2,30 @@ import React from 'react';
 import { useEffect, useState } from "react";
 import { CloseIcon, ValidIcon } from "../../../svg";
 export default function Ringing({ call, setCall, answerCall, endCall }) {
-  const { receiveingCall, callEnded, name, picture } = call;
+  const { name, picture } = call;
   const [timer, setTimer] = useState(0);
-  let interval;
-  const handleTimer = () => {
-    interval = setInterval(() => {
-      setTimer((prev) => prev + 1);
-    }, 1000);
-  };
-  console.log(timer);
+  // Removed `handleTimer` as its logic is integrated into useEffect
+  // Removed `interval` declaration as it's handled within useEffect
+
   useEffect(() => {
-    if (timer <= 30) {
-      handleTimer();
-    } else {
-      setCall({ ...call, receiveingCall: false });
+    let intervalId;
+    // If we are receiving a call, and it's not yet accepted, and timer is below 30 seconds
+    if (call.receiveingCall && !call.callAccepted && timer < 30) {
+      intervalId = setInterval(() => {
+        setTimer((prev) => prev + 1);
+      }, 1000);
+    } else if (call.receiveingCall && !call.callAccepted && timer >= 30) {
+      // Automatically end the ringing if it goes beyond 30 seconds and not accepted
+      setCall((prevCall) => ({ ...prevCall, receiveingCall: false }));
     }
-    return () => clearInterval(interval);
-  }, [timer]);
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [timer, call, setCall]); // Added call and setCall to dependencies
+
   return (
     <div className="dark:bg-dark_bg_1 rounded-lg fixed  top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-lg z-30">
       {/*Container*/}
@@ -27,7 +34,7 @@ export default function Ringing({ call, setCall, answerCall, endCall }) {
         <div className="flex items-center gap-x-2">
           <img
             src={picture}
-            alt={`caller profile picture`}
+            alt="Profile picture"
             className="w-28 h-28 rounded-full"
           />
           <div>

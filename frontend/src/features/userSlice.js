@@ -20,8 +20,8 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await auth.register({
         ...values,
-        picture: values.picture || import.meta.env.VITE_DEFAULT_PICTURE,
-        status: values.status || import.meta.env.VITE_DEFAULT_STATUS,
+        picture: values.picture || process.env.REACT_APP_DEFAULT_PICTURE,
+        status: values.status || process.env.REACT_APP_DEFAULT_STATUS,
       });
       console.log("Register response:", response);
 

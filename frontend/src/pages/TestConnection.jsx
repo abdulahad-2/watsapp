@@ -40,7 +40,7 @@ export default function TestConnection() {
           <p>{error}</p>
           <div className="mt-4 p-3 bg-white rounded border">
             <p className="text-sm">
-              <span className="font-semibold">Supabase URL:</span> {import.meta.env.VITE_SUPABASE_URL || 'Not set'}
+              <span className="font-semibold">Supabase URL:</span> {process.env.REACT_APP_SUPABASE_URL || 'Not set'}
             </p>
           </div>
         </div>

@@ -1,11 +1,10 @@
 import React from 'react';
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import { ReturnIcon, ValidIcon } from "../../svg";
 
 export default function ProfileEdit({ setShowProfileEdit }) {
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
   const [name, setName] = useState(user.name || "");
   const [status, setStatus] = useState(user.status || "");

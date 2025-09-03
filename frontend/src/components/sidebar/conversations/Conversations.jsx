@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { checkOnlineStatus, getConversationId } from "../../../utils/chat";
+import { checkOnlineStatus } from "../../../utils/chat";
 import Conversation from "./Conversation";
 import React from 'react';
 
@@ -17,7 +17,7 @@ export default function Conversations({ onlineUsers, typing }) {
               (c) =>
                 c.latestMessage ||
                 c._id === activeConversation._id ||
-                c.isGroup == true
+                c.isGroup === true
             )
             .map((convo) => {
               let check = checkOnlineStatus(onlineUsers, user, convo.users);

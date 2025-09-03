@@ -18,7 +18,7 @@ const initialState = {
 //functions
 export const getConversations = createAsyncThunk(
   "conervsation/all",
-  async (token, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get(CONVERSATION_ENDPOINT);
       return data;
@@ -30,7 +30,7 @@ export const getConversations = createAsyncThunk(
 export const open_create_conversation = createAsyncThunk(
   "conervsation/open_create",
   async (values, { rejectWithValue }) => {
-    const { token, receiver_id, isGroup, convo_id } = values;
+    const { receiver_id, isGroup, convo_id } = values;
     try {
       const { data } = await api.post(CONVERSATION_ENDPOINT, {
         receiver_id,
@@ -46,7 +46,7 @@ export const open_create_conversation = createAsyncThunk(
 export const getConversationMessages = createAsyncThunk(
   "conervsation/messages",
   async (values, { rejectWithValue }) => {
-    const { token, convo_id } = values;
+    const { convo_id } = values;
     try {
       const { data } = await api.get(`${MESSAGE_ENDPOINT}/${convo_id}`);
       return data;
@@ -58,7 +58,7 @@ export const getConversationMessages = createAsyncThunk(
 export const sendMessage = createAsyncThunk(
   "message/send",
   async (values, { rejectWithValue }) => {
-    const { token, message, convo_id, files } = values;
+    const { message, convo_id, files } = values;
     try {
       const { data } = await api.post(MESSAGE_ENDPOINT, {
         message,
@@ -74,7 +74,7 @@ export const sendMessage = createAsyncThunk(
 export const createGroupConversation = createAsyncThunk(
   "conervsation/create_group",
   async (values, { rejectWithValue }) => {
-    const { token, name, users } = values;
+    const { name, users } = values;
     try {
       const { data } = await api.post(`${CONVERSATION_ENDPOINT}/group`, {
         name,
@@ -90,7 +90,7 @@ export const createGroupConversation = createAsyncThunk(
 export const deleteMessage = createAsyncThunk(
   "message/delete",
   async (values, { rejectWithValue }) => {
-    const { token, messageId, convo_id } = values;
+    const { messageId, convo_id } = values;
     try {
       await api.delete(`${MESSAGE_ENDPOINT}/${messageId}`, {
         data: { convo_id },
@@ -105,7 +105,7 @@ export const deleteMessage = createAsyncThunk(
 export const starMessage = createAsyncThunk(
   "message/star",
   async (values, { rejectWithValue }) => {
-    const { token, messageId } = values;
+    const { messageId } = values;
     try {
       const { data } = await api.patch(
         `${MESSAGE_ENDPOINT}/${messageId}/star`,

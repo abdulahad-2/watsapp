@@ -18,7 +18,7 @@ export default function Call({
   totalSecInCall,
   setTotalSecInCall,
 }) {
-  const { receiveingCall, callEnded, name, picture } = call;
+  const { receiveingCall, callEnded, name } = call;
   const [showActions, setShowActions] = useState(false);
   const [toggle, setToggle] = useState(false);
   return (
