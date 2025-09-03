@@ -1,24 +1,34 @@
-// backend/src/socketServer.js
-let onlineUsers = []; // in-memory store
+let onlineUsers = {}; // { userId: [socketId1, socketId2...] }
 
 export default function (socket, io) {
   // User joins app
   socket.on("join", (userId) => {
     if (!userId) return;
 
-    socket.join(userId); // private room for user
-    if (!onlineUsers.some((u) => u.userId === userId)) {
-      onlineUsers.push({ userId, socketId: socket.id });
+    socket.join(userId); // private room
+
+    if (!onlineUsers[userId]) {
+      onlineUsers[userId] = [];
+    }
+    if (!onlineUsers[userId].includes(socket.id)) {
+      onlineUsers[userId].push(socket.id);
     }
 
-    io.emit("get-online-users", onlineUsers);
+    io.emit("user-online", { userId }); // send only user who came online
     socket.emit("setup socket", socket.id);
   });
 
   // Socket disconnect
   socket.on("disconnect", () => {
-    onlineUsers = onlineUsers.filter((u) => u.socketId !== socket.id);
-    io.emit("get-online-users", onlineUsers);
+    for (let userId in onlineUsers) {
+      onlineUsers[userId] = onlineUsers[userId].filter(
+        (sid) => sid !== socket.id
+      );
+      if (onlineUsers[userId].length === 0) {
+        delete onlineUsers[userId];
+        io.emit("user-offline", { userId });
+      }
+    }
   });
 
   // Join conversation room
@@ -28,15 +38,13 @@ export default function (socket, io) {
 
   // Send message
   socket.on("send message", (message) => {
-    if (!message?.conversation?.users || !Array.isArray(message.conversation.users)) return;
-
-    const { conversation, sender } = message;
-    if (!sender?._id) return;
+    const { conversation, sender } = message || {};
+    if (!conversation?.users || !sender?._id) return;
 
     conversation.users.forEach((user) => {
-      if (!user?._id) return;
-      if (user._id === sender._id) return; // skip self
-      socket.in(user._id).emit("receive message", message);
+      const uid = user._id || user.id || user;
+      if (!uid || uid === sender._id) return;
+      socket.in(uid).emit("receive message", message);
     });
   });
 
@@ -44,22 +52,21 @@ export default function (socket, io) {
   socket.on("typing", (conversationId) => {
     if (conversationId) socket.in(conversationId).emit("typing", conversationId);
   });
-
   socket.on("stop typing", (conversationId) => {
     if (conversationId) socket.in(conversationId).emit("stop typing", conversationId);
   });
 
   // Calling
   socket.on("call user", (data) => {
-    const userSocket = onlineUsers.find((u) => u.userId === data.userToCall);
-    if (userSocket) {
-      io.to(userSocket.socketId).emit("call user", {
+    const sockets = onlineUsers[data.userToCall] || [];
+    sockets.forEach((sid) => {
+      io.to(sid).emit("call user", {
         signal: data.signal,
         from: data.from,
         name: data.name,
         picture: data.picture,
       });
-    }
+    });
   });
 
   socket.on("answer call", (data) => {

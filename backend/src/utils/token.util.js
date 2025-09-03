@@ -1,34 +1,29 @@
-import jwt from "jsonwebtoken";
-import logger from "../configs/logger.config.js";
-export const sign = async (payload, expiresIn, secret) => {
-  return new Promise((resolve, reject) => {
-    jwt.sign(
-      payload,
-      secret,
-      {
-        expiresIn: expiresIn,
-      },
-      (error, token) => {
-        if (error) {
-          logger.error(error);
-          reject(error);
-        } else {
-          resolve(token);
-        }
-      }
-    );
-  });
+import { sign, verify } from "../utils/token.util.js";
+
+// Access token generate
+export const generateAccessToken = async (payload) => {
+  return await sign(
+    payload,
+    process.env.JWT_ACCESS_EXPIRATION || "15m",
+    process.env.ACCESS_TOKEN_SECRET
+  );
 };
 
-export const verify = async (token, secret) => {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, secret, (error, payload) => {
-      if (error) {
-        logger.error(error);
-        resolve(null);
-      } else {
-        resolve(payload);
-      }
-    });
-  });
+// Refresh token generate
+export const generateRefreshToken = async (payload) => {
+  return await sign(
+    payload,
+    process.env.JWT_REFRESH_EXPIRATION || "7d",
+    process.env.REFRESH_TOKEN_SECRET
+  );
+};
+
+// Verify Access Token
+export const verifyAccessToken = async (token) => {
+  return await verify(token, process.env.ACCESS_TOKEN_SECRET);
+};
+
+// Verify Refresh Token
+export const verifyRefreshToken = async (token) => {
+  return await verify(token, process.env.REFRESH_TOKEN_SECRET);
 };

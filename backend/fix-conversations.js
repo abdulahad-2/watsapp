@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import { ConversationModel } from './src/models/index.js';
-import { MessageModel } from './src/models/index.js';
+import { ConversationModel, MessageModel } from './src/models/index.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -8,52 +7,48 @@ dotenv.config();
 const fixConversations = async () => {
   try {
     await mongoose.connect(process.env.DATABASE_URL);
-    console.log('Connected to MongoDB');
+    console.log('🔗 Connected to MongoDB');
 
-    // Find conversations with only 1 user
     const incompleteConvos = await ConversationModel.find({
       isGroup: false,
       $expr: { $eq: [{ $size: "$users" }, 1] }
     });
 
-    console.log(`Found ${incompleteConvos.length} conversations with only 1 user`);
+    console.log(`🔍 Found ${incompleteConvos.length} broken conversations`);
 
     for (const convo of incompleteConvos) {
-      console.log(`\nFixing conversation ${convo._id}`);
-      console.log(`Current users: ${convo.users}`);
+      console.log(`\n🔧 Fixing convo ${convo._id}, users: ${convo.users}`);
 
-      // Find messages in this conversation to get the other user
-      const messages = await MessageModel.find({ 
-        conversation: convo._id 
-      }).populate('sender', '_id');
+      const messages = await MessageModel.find({ conversation: convo._id })
+        .populate('sender', '_id');
 
-      if (messages.length > 0) {
-        // Get all unique sender IDs from messages
-        const senderIds = [...new Set(messages.map(msg => msg.sender._id.toString()))];
-        console.log(`Message senders: ${senderIds}`);
+      if (messages.length === 0) {
+        console.log(`❌ No messages → deleting convo ${convo._id}`);
+        await ConversationModel.findByIdAndDelete(convo._id);
+        continue;
+      }
 
-        // Find the user not in the conversation
-        const currentUserId = convo.users[0].toString();
-        const otherUserId = senderIds.find(id => id !== currentUserId);
+      const senderIds = [...new Set(messages.map(msg => msg.sender._id.toString()))];
+      console.log(`   📨 Senders: ${senderIds}`);
 
-        if (otherUserId) {
-          // Update conversation to include both users
-          await ConversationModel.findByIdAndUpdate(convo._id, {
-            users: [currentUserId, otherUserId]
-          });
-          console.log(`✅ Updated conversation to include users: [${currentUserId}, ${otherUserId}]`);
-        } else {
-          console.log(`❌ Could not find other user for conversation ${convo._id}`);
-        }
+      const currentUserId = convo.users[0];
+      const otherUserId = senderIds.find(id => id !== currentUserId.toString());
+
+      if (otherUserId) {
+        await ConversationModel.findByIdAndUpdate(
+          convo._id,
+          { $addToSet: { users: mongoose.Types.ObjectId(otherUserId) } }
+        );
+        console.log(`✅ Fixed convo: added ${otherUserId}`);
       } else {
-        console.log(`❌ No messages found for conversation ${convo._id}`);
+        console.log(`❌ Could not find another user for ${convo._id}`);
       }
     }
 
-    console.log('\n✅ Conversation fix completed');
+    console.log('\n🎉 Conversation fix completed');
     process.exit(0);
-  } catch (error) {
-    console.error('Error fixing conversations:', error);
+  } catch (err) {
+    console.error('💀 Error:', err);
     process.exit(1);
   }
 };

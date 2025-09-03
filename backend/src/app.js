@@ -9,40 +9,36 @@ import cors from "cors";
 import createHttpError from "http-errors";
 import routes from "./routes/index.js";
 
-//dotEnv config
+// Load env variables
 dotenv.config();
 
-//create express app
 const app = express();
 
-//morgan
+// Logging
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-//helmet
+// Security
 app.use(helmet());
 
-//parse json request url
+// JSON + URL parsing
 app.use(express.json());
-
-//parse json request body
 app.use(express.urlencoded({ extended: true }));
 
-//enable cookie parser
+// Cookies + Compression
 app.use(cookieParser());
-
-//gzip compression
 app.use(compression());
 
-//file upload
+// File upload (with size limit)
 app.use(
   fileUpload({
     useTempFiles: true,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   })
 );
 
-// ✅ allowed origins array (same for socket + express)
+// ✅ Allowed origins
 const allowedOrigins = [
   process.env.CLIENT_ENDPOINT || "http://localhost:3000",
   "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
@@ -51,31 +47,32 @@ const allowedOrigins = [
   "https://watsapp-mu.vercel.app",
 ];
 
-//cors
+// CORS
 app.use(
   cors({
     origin: allowedOrigins,
-    methods: ["GET", "POST"], // ✅ add this
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
+    optionsSuccessStatus: 200,
   })
 );
 
-//root route
+// Root route
 app.get("/", (req, res) => {
   res.json({ message: "WhatsApp Clone Backend API is running!" });
 });
 
-//api v1 routes
+// API routes
 app.use("/api/v1", routes);
 
-app.use(async (req, res, next) => {
+// 404 handler
+app.use((req, res, next) => {
   next(createHttpError.NotFound("This route does not exist."));
 });
 
-//error handling
-app.use(async (err, req, res, next) => {
-  res.status(err.status || 500);
-  res.send({
+// Error handler (no async needed)
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
     error: {
       status: err.status || 500,
       message: err.message,

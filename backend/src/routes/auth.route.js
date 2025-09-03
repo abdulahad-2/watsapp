@@ -6,11 +6,13 @@ import {
   refreshToken,
   register,
 } from "../controllers/auth.controller.js";
+
 const router = express.Router();
 
-router.route("/register").post(trimRequest.all, register);
-router.route("/login").post(trimRequest.all, login);
-router.route("/logout").post(trimRequest.all, logout);
-router.route("/refreshtoken").post(trimRequest.all, refreshToken);
+// Routes
+router.post("/register", trimRequest.all, register);
+router.post("/login", trimRequest.all, login);
+router.post("/logout", trimRequest.all, logout);
+router.post("/refreshtoken", trimRequest.all, refreshToken);
 
 export default router;

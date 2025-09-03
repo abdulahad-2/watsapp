@@ -1,62 +1,59 @@
-import 'dotenv/config';
+import "dotenv/config";
 import { Server } from "socket.io";
 import app from "./app.js";
 import logger from "./configs/logger.config.js";
 import SocketServer from "./SocketServer.js";
+import allowedOrigins from "./configs/allowedOrigins.js";
 
-//env variables
+// Env variables
 const PORT = process.env.PORT || 5000;
 
-let server;
-
-server = app.listen(PORT, () => {
-  logger.info(`Server is listening at ${PORT}.`);
+let server = app.listen(PORT, () => {
+  logger.info(`🚀 Server is listening at ${PORT}`);
 });
 
-// Allowed Origins
-const allowedOrigins = [
-  process.env.CLIENT_ENDPOINT || "http://localhost:3000",
-  "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
-  "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
-  "https://chatapp-rho-six.vercel.app",
-  "https://watsapp-mu.vercel.app"
-];
-
-//socket io
+// Socket.io setup
 const io = new Server(server, {
-  pingTimeout: 60000,
+  pingTimeout: 120000, // 2 min timeout for slow internet
   cors: {
     origin: allowedOrigins,
-    methods: ["GET", "POST"],   // ✅ add this
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   },
 });
 
 io.on("connection", (socket) => {
-  logger.info("socket io connected successfully.");
+  logger.info("⚡ Socket.io connected successfully.");
   SocketServer(socket, io);
+
+  socket.on("disconnect", () => {
+    logger.info("⚡ Socket.io client disconnected.");
+  });
 });
 
-//handle server errors
+// Graceful shutdown
 const exitHandler = () => {
   if (server) {
-    logger.info("Server closed.");
-    process.exit(1);
+    io.close(() => logger.info("⚡ Socket.io closed."));
+    server.close(() => {
+      logger.info("🛑 HTTP server closed.");
+      process.exit(1);
+    });
   } else {
     process.exit(1);
   }
 };
 
 const unexpectedErrorHandler = (error) => {
-  logger.error(error);
+  logger.error("💥 Unexpected Error:", error);
   exitHandler();
 };
+
 process.on("uncaughtException", unexpectedErrorHandler);
 process.on("unhandledRejection", unexpectedErrorHandler);
 
-//SIGTERM
+// SIGTERM (Render, Vercel etc.)
 process.on("SIGTERM", () => {
-  if (server) {
-    exitHandler();
-  }
+  logger.info("🛑 SIGTERM received. Closing server...");
+  exitHandler();
 });

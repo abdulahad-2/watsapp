@@ -10,9 +10,16 @@ import {
 
 const router = express.Router();
 
-router.route("/").post(trimRequest.all, authMiddleware, createCommunity);
-router.route("/").get(trimRequest.all, authMiddleware, getCommunities);
-router.route("/:community_id/join").post(trimRequest.all, authMiddleware, joinCommunity);
-router.route("/:community_id/leave").post(trimRequest.all, authMiddleware, leaveCommunity);
+// Create a new community
+router.post("/", trimRequest.all, authMiddleware, createCommunity);
+
+// Get all communities for logged-in user
+router.get("/", trimRequest.all, authMiddleware, getCommunities);
+
+// Join a community
+router.post("/:community_id/join", trimRequest.all, authMiddleware, joinCommunity);
+
+// Leave a community
+router.post("/:community_id/leave", trimRequest.all, authMiddleware, leaveCommunity);
 
 export default router;

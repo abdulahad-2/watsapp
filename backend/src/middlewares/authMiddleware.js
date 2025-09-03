@@ -4,58 +4,54 @@ import { createClient } from "@supabase/supabase-js";
 
 // Supabase config
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY; // ✅ Use anon key for auth
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  throw new Error(
-    "Missing Supabase configuration: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY/SUPABASE_SERVICE_KEY"
-  );
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error("❌ Missing Supabase config: SUPABASE_URL or SUPABASE_ANON_KEY");
 }
 
-// Create Supabase client
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+// Create Supabase client (anon key, safe for token verification)
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Middleware
 export default async function authMiddleware(req, res, next) {
   try {
-    // Get the authorization header
     const authHeader = req.headers?.authorization;
-    if (!authHeader) {
-      console.error("Authorization header missing");
+    if (!authHeader?.startsWith("Bearer ")) {
+      console.error("❌ Authorization header invalid or missing");
       return next(createHttpError.Unauthorized("Authorization header missing"));
     }
 
-    // Extract the token
-    const token = authHeader.split(" ")[1];
+    // Extract token after "Bearer "
+    const token = authHeader.split(" ")[1]?.trim();
     if (!token) {
-      console.error("Bearer token missing");
+      console.error("❌ Bearer token missing");
       return next(createHttpError.Unauthorized("Bearer token missing"));
     }
 
-    // First verify the token directly
+    // Verify token with Supabase
     const {
-      data: { user: sessionUser },
-      error: sessionError,
+      data: { user },
+      error,
     } = await supabase.auth.getUser(token);
 
-    if (sessionError) {
-      console.error("Session error:", sessionError);
-      return next(createHttpError.Unauthorized("Invalid token"));
+    if (error) {
+      console.error("❌ Supabase session error:", error.message);
+      return next(createHttpError.Unauthorized("Invalid or expired token"));
     }
 
-    if (!sessionUser) {
-      console.error("User not found in session");
+    if (!user) {
+      console.error("❌ User not found in token");
       return next(createHttpError.Unauthorized("User not found"));
     }
 
-    // Add the user and token to the request for downstream use
-    req.user = sessionUser;
+    // Attach user + token to request
+    req.user = user;
     req.token = token;
 
     next();
   } catch (err) {
-    console.error("Auth middleware unexpected error:", err);
+    console.error("❌ Auth middleware crashed:", err.message);
     return next(createHttpError.Unauthorized("Unexpected auth error"));
   }
 }

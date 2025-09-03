@@ -6,12 +6,16 @@ import {
   create_open_conversation,
   getConversations,
 } from "../controllers/conversation.controller.js";
+
 const router = express.Router();
 
-router
-  .route("/")
-  .post(trimRequest.all, authMiddleware, create_open_conversation);
-router.route("/").get(trimRequest.all, authMiddleware, getConversations);
-router.route("/group").post(trimRequest.all, authMiddleware, createGroup);
+// Create/open a one-to-one conversation
+router.post("/", trimRequest.all, authMiddleware, create_open_conversation);
+
+// Get all conversations for logged-in user
+router.get("/", trimRequest.all, authMiddleware, getConversations);
+
+// Create a group conversation
+router.post("/group", trimRequest.all, authMiddleware, createGroup);
 
 export default router;
