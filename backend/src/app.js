@@ -36,7 +36,7 @@ app.use(
 
 // ✅ Allowed origins
 const allowedOrigins = [
-  process.env.CLIENT_ENDPOINT || "http://localhost:3000",
+  process.env.CORS_ORIGIN || "http://localhost:3000", // Use CORS_ORIGIN
   "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
   "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
   "https://chatapp-rho-six.vercel.app",

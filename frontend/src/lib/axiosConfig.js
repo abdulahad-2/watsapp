@@ -71,7 +71,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post("/api/auth/refresh");
+        const response = await api.post("/auth/refresh"); // Corrected path
         const { user } = response.data;
 
         // Import the action creator dynamically to avoid circular dependency
