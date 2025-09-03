@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Server } from "socket.io";
 import app from "./app.js";
 import logger from "./configs/logger.config.js";
@@ -56,7 +57,6 @@ process.on("unhandledRejection", unexpectedErrorHandler);
 //SIGTERM
 process.on("SIGTERM", () => {
   if (server) {
-    logger.info("Server closed.");
-    process.exit(1);
+    exitHandler();
   }
 });
