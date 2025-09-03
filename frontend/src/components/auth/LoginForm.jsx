@@ -61,7 +61,6 @@ export default function RegisterForm() {
             error={errors?.password?.message}
             autoComplete="current-password"
             aria-label="Password"
-            minLength={8}
           />
 
           {/* Error */}
