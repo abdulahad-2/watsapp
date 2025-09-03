@@ -1,6 +1,7 @@
 import createHttpError from "http-errors";
 import validator from "validator";
 import { createClient } from '@supabase/supabase-js';
+import logger from "../utils/logger";
 
 //env variables
 const { DEFAULT_PICTURE, DEFAULT_STATUS, SUPABASE_URL } = process.env;
@@ -72,6 +73,7 @@ export const createUser = async (userData) => {
   });
 
   if (authError) {
+    logger.error("Supabase createUser error:", authError);
     if (authError.message.includes('already registered')) {
       throw createHttpError.Conflict(
         "Please try again with a different email address, this email already exist."
