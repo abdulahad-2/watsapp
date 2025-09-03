@@ -31,6 +31,7 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data) => {
+    console.log("Frontend registration data before dispatch:", data);
     dispatch(changeStatus("loading"));
     try {
       let imageUrl = "";
