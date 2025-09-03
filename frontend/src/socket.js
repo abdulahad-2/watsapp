@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // Use Vite env variable or fallback
-const SOCKET_URL = process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000";
+const SOCKET_URL = process.env.REACT_APP_API_ENDPOINT;
 
 const socket = io(SOCKET_URL);
 

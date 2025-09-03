@@ -15,10 +15,10 @@ import Register from "./pages/register";
 import TestConnection from "./pages/TestConnection";
 // socket io - use Vite envs
 const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const SOCKET_URL =
-  process.env.REACT_APP_SOCKET_URL ||
-  (API_ENDPOINT ? API_ENDPOINT.split("/api/")[0] : "http://localhost:5000");
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 const socket = io(SOCKET_URL);
+
+console.log("REACT_APP_API_ENDPOINT:", process.env.REACT_APP_API_ENDPOINT);
 
 function App() {
   //const [connected, setConnected] = useState(false);
