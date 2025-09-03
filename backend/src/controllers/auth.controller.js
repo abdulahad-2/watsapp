@@ -43,6 +43,9 @@ export const register = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (error.message.includes("already exist")) {
+      return res.status(409).json({ message: "User with this email already exists. Please try logging in or use a different email." });
+    }
     next(error);
   }
 };
