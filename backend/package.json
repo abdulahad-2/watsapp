@@ -10,8 +10,7 @@
   "dev": "nodemon server.js",
   "keep-alive": "node keep-alive.js",
   "build": "npm install"
-}
-,
+},
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.56.0",
