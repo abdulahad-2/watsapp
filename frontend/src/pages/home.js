@@ -55,7 +55,7 @@ function Home({ socket }) {
 
   //call
   useEffect(() => {
-    setupMedia();
+    // Don't setup media automatically - only when needed for calls
     socket.on("setup socket", (id) => {
       setCall(prevCall => ({ ...prevCall, socketId: id }));
     });
@@ -80,7 +80,7 @@ function Home({ socket }) {
   }, [call, callAccepted, socket]);
   //--call user funcion
   const callUser = () => {
-    enableMedia();
+    setupMedia(); // Request media only when user initiates call
     setCall({
       ...call,
       name: getConversationName(user, activeConversation.users),
@@ -111,7 +111,7 @@ function Home({ socket }) {
   };
   //--answer call  funcion
   const answerCall = () => {
-    enableMedia();
+    setupMedia(); // Request media only when user answers call
     setCallAccepted(true);
     const peer = new Peer({
       initiator: false,
@@ -160,7 +160,9 @@ function Home({ socket }) {
   };
 
   const enableMedia = () => {
-    myVideo.current.srcObject = stream;
+    if (stream && myVideo.current) {
+      myVideo.current.srcObject = stream;
+    }
     setShow(true);
   };
   //get Conversations
