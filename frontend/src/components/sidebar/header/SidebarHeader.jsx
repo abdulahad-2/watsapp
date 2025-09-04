@@ -7,7 +7,7 @@ import { CreateGroup } from "./createGroup";
 import ProfileEdit from "../../profile/ProfileEdit";
 import NewCommunity from "../../community/NewCommunity";
 import Stories from "../../stories/Stories";
-import NewChat from "../../Chat/NewChat";
+import NewChat from "../../chat/NewChat";
 import AIChat from "../../chat/AIChat";
 export default function SidebarHeader() {
   const { user } = useSelector((state) => state.user);
