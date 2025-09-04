@@ -3,10 +3,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = express.Router();
 
-// Initialize Gemini AI
+// Gemini init
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Chat with AI endpoint
+// Chat endpoint
 router.post("/chat", async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
@@ -17,24 +17,19 @@ router.post("/chat", async (req, res) => {
       });
     }
 
-    // Get the generative model
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    // Build conversation context
-    let prompt = "You are a helpful AI assistant in a WhatsApp-like chat application. Be friendly and conversational.\n\n";
-    
-    // Add conversation history for context
+    // build prompt
+    let prompt = "You are a helpful AI assistant in a WhatsApp-like chat application. Be friendly.\n\n";
     if (conversationHistory.length > 0) {
       prompt += "Previous conversation:\n";
-      conversationHistory.slice(-5).forEach(msg => { // Last 5 messages for context
-        prompt += `${msg.sender === 'ai' ? 'Assistant' : 'User'}: ${msg.text}\n`;
+      conversationHistory.slice(-5).forEach(msg => {
+        prompt += `${msg.sender === "ai" ? "Assistant" : "User"}: ${msg.text}\n`;
       });
       prompt += "\n";
     }
-    
     prompt += `User: ${message}\nAssistant:`;
 
-    // Generate response
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const aiMessage = response.text();
@@ -42,27 +37,26 @@ router.post("/chat", async (req, res) => {
     res.json({
       message: "AI response generated successfully",
       response: aiMessage,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error("Gemini AI Error:", error);
     res.status(500).json({
-      error: { 
-        status: 500, 
+      error: {
+        status: 500,
         message: "Failed to generate AI response",
-        details: error.message 
-      }
+        details: error.message,
+      },
     });
   }
 });
 
-// Health check for AI service
+// Health check
 router.get("/status", (req, res) => {
   res.json({
     status: "AI service is running",
     model: "gemini-pro",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
