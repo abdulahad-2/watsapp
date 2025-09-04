@@ -7,29 +7,34 @@ import SocketServer from "./SocketServer.js";
 // Env variables
 const PORT = process.env.PORT || 5000;
 
+// Start server
 let server = app.listen(PORT, () => {
   logger.info(`🚀 Server is listening at ${PORT}`);
 });
 
-// Allowed Origins for Socket.io
+// Allowed Origins
 const allowedOrigins = [
-  process.env.CORS_ORIGIN || "http://localhost:3000", // Use CORS_ORIGIN
+  process.env.CORS_ORIGIN || "http://localhost:3000",
   "https://chatapp-9owodedez-abdulahad-2s-projects.vercel.app",
   "https://chatapp-git-main-abdulahad-2s-projects.vercel.app",
   "https://chatapp-rho-six.vercel.app",
   "https://watsapp-mu.vercel.app",
 ];
 
-// Socket.io setup
+// Socket.io setup with function-based CORS (array can fail sometimes)
 const io = new Server(server, {
-  pingTimeout: 120000, // 2 min timeout for slow internet
+  pingTimeout: 120000, // 2 min timeout
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+      else callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   },
 });
 
+// Socket connection
 io.on("connection", (socket) => {
   logger.info("⚡ Socket.io connected successfully.");
   SocketServer(socket, io);
@@ -52,6 +57,7 @@ const exitHandler = () => {
   }
 };
 
+// Error handling
 const unexpectedErrorHandler = (error) => {
   logger.error("💥 Unexpected Error:", error);
   exitHandler();
@@ -60,7 +66,7 @@ const unexpectedErrorHandler = (error) => {
 process.on("uncaughtException", unexpectedErrorHandler);
 process.on("unhandledRejection", unexpectedErrorHandler);
 
-// SIGTERM (Render, Vercel etc.)
+// SIGTERM
 process.on("SIGTERM", () => {
   logger.info("🛑 SIGTERM received. Closing server...");
   exitHandler();
