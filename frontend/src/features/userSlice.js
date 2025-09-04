@@ -25,7 +25,7 @@ export const registerUser = createAsyncThunk(
       });
       console.log("Register response:", response);
 
-      if (!response.token) {
+      if (!response.user?.token) {
         throw new Error("No token received from server");
       }
 
@@ -36,7 +36,7 @@ export const registerUser = createAsyncThunk(
           email: response.user.email,
           picture: response.user.picture,
           status: response.user.status,
-          token: response.token,
+          token: response.user.token,
         },
       };
     } catch (error) {
@@ -52,7 +52,7 @@ export const loginUser = createAsyncThunk(
       const response = await auth.login(values);
       console.log("Auth response:", response);
 
-      if (!response.token) {
+      if (!response.user?.token) {
         throw new Error("No token received from server");
       }
 
@@ -63,7 +63,7 @@ export const loginUser = createAsyncThunk(
           email: response.user.email,
           picture: response.user.picture,
           status: response.user.status,
-          token: response.token,
+          token: response.user.token,
         },
       };
     } catch (error) {
