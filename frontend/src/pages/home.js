@@ -9,7 +9,7 @@ import {
   updateMessagesAndConversations,
   removeMessage,
 } from "../features/chatSlice";
-import Call from "../components/Chat/call/Call";
+import Call from "../components/chat/call/Call";
 import {
   getConversationId,
   getConversationName,

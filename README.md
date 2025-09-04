@@ -52,6 +52,25 @@ This project is a comprehensive WhatsApp clone featuring real-time messaging, me
 </div>
 
 🚀 **[Live Demo](your-demo-link-here)** - Experience the application in action!
+## ⚠️ Case Sensitivity Note
+
+This project is deployed on **Vercel (Linux servers)**.  
+Linux file system is **case-sensitive**, unlike Windows/Mac.  
+
+👉 So make sure imports match the exact file/folder name:
+- `import Chat from "../components/chat/Chat";` ✅
+- `import Chat from "../components/Chat/Chat";` ❌ (will break on Vercel)
+
+If you rename a file/folder only by changing its **case** (`Chat` → `chat`),  
+Git might not detect it on Windows/Mac. To fix that:
+
+```bash
+# Force rename to update Git
+git mv src/components/chat src/components/chat_temp
+git commit -m "temp rename to force case change"
+
+git mv src/components/chat_temp src/components/chat
+git commit -m "fix: case sensitivity issue"
 
 ## 🛠️ Tech Stack
 
