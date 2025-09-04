@@ -7,8 +7,8 @@ import { CreateGroup } from "./createGroup";
 import ProfileEdit from "../../profile/ProfileEdit";
 import NewCommunity from "../../community/NewCommunity";
 import Stories from "../../stories/Stories";
-import NewChat from "../../chat/NewChat";
-import AIChat from "../../chat/AIChat";
+import NewChat from "../../chat/NewChat.jsx";
+import AIChat from "../../chat/AIChat.jsx";
 export default function SidebarHeader() {
   const { user } = useSelector((state) => state.user);
   const [showMenu, setShowMenu] = useState(false);
