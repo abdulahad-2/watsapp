@@ -3,7 +3,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
-import authMiddleware from "./src/middleware/authMiddleware.js";
+import authMiddleware from "./src/middlewares/authMiddleware.js";
 import socketServer from "./src/SocketServer.js";
 
 dotenv.config();
