@@ -11,13 +11,18 @@ router.addUser = (user) => {
   const existingUser = registeredUsers.find(u => u.email === user.email);
   if (!existingUser) {
     registeredUsers.push({
-      _id: user.id || Date.now().toString(),
+      _id: user._id || user.id || Date.now().toString(),
       name: user.name,
       email: user.email,
       picture: user.picture,
       status: user.status || "Hey there! I am using WhatsApp."
     });
   }
+};
+
+// Find user by email (called from auth routes)
+router.findUser = (email) => {
+  return registeredUsers.find(u => u.email === email);
 };
 
 // User search route - supports both /search and query params
@@ -57,6 +62,24 @@ router.get("/", (req, res) => {
 // Get all registered users (for debugging)
 router.get("/all", (req, res) => {
   res.json(registeredUsers);
+});
+
+// Update user profile
+router.put("/profile", (req, res) => {
+  const { email, name, picture, status } = req.body;
+  
+  const userIndex = registeredUsers.findIndex(u => u.email === email);
+  if (userIndex !== -1) {
+    registeredUsers[userIndex] = {
+      ...registeredUsers[userIndex],
+      name: name || registeredUsers[userIndex].name,
+      picture: picture || registeredUsers[userIndex].picture,
+      status: status || registeredUsers[userIndex].status
+    };
+    res.json({ message: "Profile updated successfully", user: registeredUsers[userIndex] });
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
 });
 
 export default router;

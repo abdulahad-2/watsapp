@@ -41,17 +41,30 @@ router.post("/login", (req, res) => {
     });
   }
 
+  // Find existing user or create default
+  const existingUser = userRouter.findUser ? userRouter.findUser(email) : null;
+  
+  const userData = existingUser || {
+    _id: `user_${Date.now()}`,
+    name: email.split('@')[0],
+    email,
+    picture: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png",
+    status: "Hey there! I am using WhatsApp.",
+    token: `token_${Date.now()}`
+  };
+
+  // If user doesn't exist, add them
+  if (!existingUser) {
+    userRouter.addUser(userData);
+  } else {
+    // Update token for existing user
+    userData.token = `token_${Date.now()}`;
+  }
+
   // Immediate response - no processing delays
   res.json({
     message: "login success.",
-    user: {
-      _id: `user_${Date.now()}`,
-      name: email.split('@')[0],
-      email,
-      picture: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png",
-      status: "Hey there! I am using WhatsApp.",
-      token: `token_${Date.now()}`
-    }
+    user: userData
   });
 });
 
