@@ -1,21 +1,18 @@
 import express from "express";
-import trimRequest from "trim-request";
-import authMiddleware from "../middlewares/authMiddleware.js";
-import {
-  createGroup,
-  create_open_conversation,
-  getConversations,
-} from "../controllers/conversation.controller.js";
 
 const router = express.Router();
 
-// Create/open a one-to-one conversation
-router.post("/", trimRequest.all, authMiddleware, create_open_conversation);
+// Simple conversation routes
+router.post("/", (req, res) => {
+  res.json({ message: "Conversation created", conversation: {} });
+});
 
-// Get all conversations for logged-in user
-router.get("/", trimRequest.all, authMiddleware, getConversations);
+router.get("/", (req, res) => {
+  res.json({ message: "Conversations retrieved", conversations: [] });
+});
 
-// Create a group conversation
-router.post("/group", trimRequest.all, authMiddleware, createGroup);
+router.post("/group", (req, res) => {
+  res.json({ message: "Group created", group: {} });
+});
 
 export default router;

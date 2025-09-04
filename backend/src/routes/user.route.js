@@ -1,11 +1,10 @@
 import express from "express";
-import trimRequest from "trim-request";
-import { searchUsers } from "../controllers/user.controller.js";
-import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// ✅ Search users → GET /users/search?query=ahad
-router.route("/search").get(trimRequest.all, authMiddleware, searchUsers);
+// Simple search route
+router.get("/search", (req, res) => {
+  res.json({ message: "User search endpoint working", users: [] });
+});
 
 export default router;

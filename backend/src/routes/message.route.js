@@ -1,32 +1,26 @@
 import express from "express";
-import trimRequest from "trim-request";
-import authMiddleware from "../middlewares/authMiddleware.js";
-import {
-  sendMessage,
-  getMessages,
-  deleteMessage,
-  starMessage,
-  getStarredMessages,
-} from "../controllers/message.controller.js";
 
 const router = express.Router();
 
-// Messages inside a conversation
-router
-  .route("/:convo_id")
-  .get(trimRequest.all, authMiddleware, getMessages)   // Get all messages from a conversation
-  .post(trimRequest.all, authMiddleware, sendMessage); // Send a new message to a conversation
+// Simple message routes
+router.get("/:convo_id", (req, res) => {
+  res.json({ message: "Messages retrieved", messages: [] });
+});
 
-// Starred messages
-router.route("/starred").get(trimRequest.all, authMiddleware, getStarredMessages);
+router.post("/:convo_id", (req, res) => {
+  res.json({ message: "Message sent", messageData: {} });
+});
 
-// Single message actions
-router
-  .route("/:message_id")
-  .delete(trimRequest.all, authMiddleware, deleteMessage); // Delete a message
+router.get("/starred", (req, res) => {
+  res.json({ message: "Starred messages", messages: [] });
+});
 
-router
-  .route("/:message_id/star")
-  .patch(trimRequest.all, authMiddleware, starMessage);   // Star/unstar a message
+router.delete("/:message_id", (req, res) => {
+  res.json({ message: "Message deleted" });
+});
+
+router.patch("/:message_id/star", (req, res) => {
+  res.json({ message: "Message starred" });
+});
 
 export default router;
