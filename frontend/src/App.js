@@ -7,6 +7,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { io } from "socket.io-client";
+import { Analytics } from "@vercel/analytics/react";
 import SocketContext from "./context/SocketContext";
 //Pages
 import Home from "./pages/home";
@@ -81,7 +82,8 @@ function App() {
             element: React.createElement(TestConnection),
           })
         )
-      )
+      ),
+      React.createElement(Analytics)
     )
   );
 }

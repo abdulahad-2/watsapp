@@ -1,4 +1,5 @@
 import express from "express";
+import userRouter from "./user.route.js";
 
 const router = express.Router();
 
@@ -12,17 +13,22 @@ router.post("/register", (req, res) => {
     });
   }
 
+  const userData = {
+    _id: `user_${Date.now()}`,
+    name,
+    email,
+    picture: req.body.picture || "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png",
+    status: req.body.status || "Hey there! I am using WhatsApp.",
+    token: `token_${Date.now()}`
+  };
+
+  // Add user to searchable users list
+  userRouter.addUser(userData);
+
   // Immediate response - no processing delays
   res.status(201).json({
     message: "register success.",
-    user: {
-      _id: `user_${Date.now()}`,
-      name,
-      email,
-      picture: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png",
-      status: "Hey there! I am using WhatsApp.",
-      token: `token_${Date.now()}`
-    }
+    user: userData
   });
 });
 

@@ -2,37 +2,23 @@ import express from "express";
 
 const router = express.Router();
 
-// Mock users for testing
-const mockUsers = [
-  {
-    _id: "user1",
-    name: "John Doe",
-    email: "john@example.com",
-    picture: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    status: "Available"
-  },
-  {
-    _id: "user2", 
-    name: "Jane Smith",
-    email: "jane@example.com",
-    picture: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    status: "Busy"
-  },
-  {
-    _id: "user3",
-    name: "Ahmed Ali", 
-    email: "ahmed@example.com",
-    picture: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    status: "Hey there! I am using WhatsApp."
-  },
-  {
-    _id: "user4",
-    name: "Sarah Johnson",
-    email: "sarah@example.com", 
-    picture: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    status: "Online"
+// In-memory storage for registered users (in real app, this would be a database)
+let registeredUsers = [];
+
+// Add user to registered users list (called from auth routes)
+router.addUser = (user) => {
+  // Check if user already exists
+  const existingUser = registeredUsers.find(u => u.email === user.email);
+  if (!existingUser) {
+    registeredUsers.push({
+      _id: user.id || Date.now().toString(),
+      name: user.name,
+      email: user.email,
+      picture: user.picture,
+      status: user.status || "Hey there! I am using WhatsApp."
+    });
   }
-];
+};
 
 // User search route - supports both /search and query params
 router.get("/search", (req, res) => {
@@ -43,7 +29,7 @@ router.get("/search", (req, res) => {
   }
   
   // Filter users based on search term (name or email)
-  const filteredUsers = mockUsers.filter(user => 
+  const filteredUsers = registeredUsers.filter(user => 
     user.name.toLowerCase().includes(search.toLowerCase()) ||
     user.email.toLowerCase().includes(search.toLowerCase())
   );
@@ -60,12 +46,17 @@ router.get("/", (req, res) => {
   }
   
   // Filter users based on search term (name or email)
-  const filteredUsers = mockUsers.filter(user => 
+  const filteredUsers = registeredUsers.filter(user => 
     user.name.toLowerCase().includes(search.toLowerCase()) ||
     user.email.toLowerCase().includes(search.toLowerCase())
   );
   
   res.json(filteredUsers);
+});
+
+// Get all registered users (for debugging)
+router.get("/all", (req, res) => {
+  res.json(registeredUsers);
 });
 
 export default router;
