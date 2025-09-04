@@ -1,17 +1,34 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { auth } from "../services/auth.service";
 
+// Load user from localStorage if available
+const loadUserFromStorage = () => {
+  try {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : {
+      id: "",
+      name: "",
+      email: "",
+      picture: "",
+      status: "",
+      token: "",
+    };
+  } catch (error) {
+    return {
+      id: "",
+      name: "",
+      email: "",
+      picture: "",
+      status: "",
+      token: "",
+    };
+  }
+};
+
 const initialState = {
   status: "",
   error: "",
-  user: {
-    id: "",
-    name: "",
-    email: "",
-    picture: "",
-    status: "",
-    token: "",
-  },
+  user: loadUserFromStorage(),
 };
 
 export const registerUser = createAsyncThunk(
@@ -99,6 +116,7 @@ export const userSlice = createSlice({
         status: "",
         token: "",
       };
+      localStorage.removeItem('user');
     },
     changeStatus: (state, action) => {
       state.status = action.payload;
@@ -106,6 +124,11 @@ export const userSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.status = "succeeded";
+      localStorage.setItem('user', JSON.stringify(action.payload));
+    },
+    updateUserProfile: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
+      localStorage.setItem('user', JSON.stringify(state.user));
     },
   },
   extraReducers(builder) {
@@ -117,6 +140,7 @@ export const userSlice = createSlice({
         state.status = "succeeded";
         state.error = "";
         state.user = action.payload.user;
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = "failed";
@@ -129,6 +153,7 @@ export const userSlice = createSlice({
         state.status = "succeeded";
         state.error = "";
         state.user = action.payload.user;
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
@@ -148,6 +173,7 @@ export const userSlice = createSlice({
           status: "",
           token: "",
         };
+        localStorage.removeItem('user');
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.status = "failed";
@@ -156,6 +182,6 @@ export const userSlice = createSlice({
   },
 });
 
-export const { logout, changeStatus, setUser } = userSlice.actions;
+export const { logout, changeStatus, setUser, updateUserProfile } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -1,10 +1,12 @@
 import React from 'react';
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import { ReturnIcon, ValidIcon } from "../../svg";
+import { updateUserProfile } from "../../features/userSlice";
 
 export default function ProfileEdit({ setShowProfileEdit }) {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
   const [name, setName] = useState(user.name || "");
   const [status, setStatus] = useState(user.status || "");
@@ -19,8 +21,9 @@ export default function ProfileEdit({ setShowProfileEdit }) {
     
     setLoading(true);
     try {
-      // TODO: Implement actual profile update API call
-      console.log("Profile update:", { name, status, picture });
+      // Update user profile in Redux store and localStorage
+      dispatch(updateUserProfile({ name, status, picture }));
+      console.log("Profile updated:", { name, status, picture });
       alert("Profile updated successfully!");
       setShowProfileEdit(false);
     } catch (error) {
