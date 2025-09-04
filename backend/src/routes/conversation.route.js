@@ -8,7 +8,7 @@ router.post("/", (req, res) => {
 });
 
 router.get("/", (req, res) => {
-  res.json({ message: "Conversations retrieved", conversations: [] });
+  res.json([]);
 });
 
 router.post("/group", (req, res) => {
