@@ -53,13 +53,8 @@ app.use(
   })
 );
 
-// Root route
-app.get("/", (req, res) => {
-  res.json({ message: "WhatsApp Clone Backend API is running!" });
-});
-
-// API routes
-app.use("/api/v1", routes);
+// API routes - direct mounting without /api/v1 prefix
+app.use("/", routes);
 
 // 404 handler
 app.use((req, res, next) => {

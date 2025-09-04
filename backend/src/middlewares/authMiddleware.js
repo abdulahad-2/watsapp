@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 // Supabase config
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY; // Renamed to SUPABASE_KEY for direct use
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   throw new Error("❌ Missing Supabase config: SUPABASE_URL or SUPABASE_KEY");

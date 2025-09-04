@@ -61,7 +61,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post("/api/auth/refresh");
+        const response = await api.post("/auth/refreshtoken");
         const { user } = response.data;
 
         store.dispatch(setUser(user));

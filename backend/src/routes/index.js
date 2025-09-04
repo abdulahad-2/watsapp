@@ -7,6 +7,11 @@ import communityRoutes from "./community.route.js";
 
 const router = express.Router();
 
+// Root route
+router.get("/", (req, res) => {
+  res.json({ message: "WhatsApp Clone Backend API is running!" });
+});
+
 // Auth routes
 router.use("/auth", authRoutes);
 

@@ -19,7 +19,7 @@ export const auth = {
   },
 
   async refreshToken() {
-    const { data } = await api.post("/api/auth/refresh");
+    const { data } = await api.post("/auth/refreshtoken");
     return data;
   },
 };
