@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "keep-alive": "node keep-alive.js"
+    "keep-alive": "node keep-alive.js",
+    "build": "npm install"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
