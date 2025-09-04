@@ -3,7 +3,22 @@ import express from "express";
 const router = express.Router();
 
 // In-memory storage for registered users (in real app, this would be a database)
-let registeredUsers = [];
+let registeredUsers = [
+  {
+    _id: "user_default_1",
+    name: "John Doe",
+    email: "john@example.com",
+    picture: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    status: "Available"
+  },
+  {
+    _id: "user_default_2", 
+    name: "Jane Smith",
+    email: "jane@example.com",
+    picture: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    status: "Busy"
+  }
+];
 
 // Add user to registered users list (called from auth routes)
 router.addUser = (user) => {
