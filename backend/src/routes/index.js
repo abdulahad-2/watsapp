@@ -20,6 +20,7 @@ router.use("/users", userRoutes);
 
 // Conversation routes
 router.use("/conversations", conversationRoutes);
+router.use("/conversation", conversationRoutes);
 
 // Message routes
 router.use("/messages", messageRoutes);
