@@ -13,7 +13,7 @@ export default function Search({ searchLength, setSearchResults }) {
     if (searchTerm && searchTerm.trim().length > 0) {
       try {
         const { data } = await axios.get(
-          `${process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000"}/api/v1/user?search=${searchTerm}`,
+          `${(process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000").replace(/\/$/, '')}/api/v1/user?search=${searchTerm}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
