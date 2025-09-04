@@ -5,6 +5,7 @@ import { auth } from "../services/auth.service";
 const loadUserFromStorage = () => {
   try {
     const savedUser = localStorage.getItem('user');
+    console.log('Loading user from localStorage:', savedUser);
     return savedUser ? JSON.parse(savedUser) : {
       id: "",
       name: "",
@@ -14,6 +15,7 @@ const loadUserFromStorage = () => {
       token: "",
     };
   } catch (error) {
+    console.error('Error loading user from localStorage:', error);
     return {
       id: "",
       name: "",
@@ -124,10 +126,12 @@ export const userSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.status = "succeeded";
+      console.log('Saving user to localStorage:', action.payload);
       localStorage.setItem('user', JSON.stringify(action.payload));
     },
     updateUserProfile: (state, action) => {
       state.user = { ...state.user, ...action.payload };
+      console.log('Updating user profile in localStorage:', state.user);
       localStorage.setItem('user', JSON.stringify(state.user));
     },
   },
@@ -140,6 +144,7 @@ export const userSlice = createSlice({
         state.status = "succeeded";
         state.error = "";
         state.user = action.payload.user;
+        console.log('Register success - saving user:', action.payload.user);
         localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -153,6 +158,7 @@ export const userSlice = createSlice({
         state.status = "succeeded";
         state.error = "";
         state.user = action.payload.user;
+        console.log('Login success - saving user:', action.payload.user);
         localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(loginUser.rejected, (state, action) => {

@@ -28,8 +28,10 @@ function App() {
 
   // Listen for 401 errors and handle them smoothly
   useEffect(() => {
+    // Only redirect if there's no token AND no saved user data
     if (
       !token &&
+      !localStorage.getItem('user') &&
       window.location.pathname !== "/login" &&
       window.location.pathname !== "/register"
     ) {
