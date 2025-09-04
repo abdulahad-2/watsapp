@@ -2,9 +2,16 @@ import express from "express";
 
 const router = express.Router();
 
-// Simple search route
+// User search route - supports both /search and query params
 router.get("/search", (req, res) => {
-  res.json({ message: "User search endpoint working", users: [] });
+  const { search } = req.query;
+  res.json([]);
+});
+
+// Also handle GET / with search query for /api/v1/user?search=
+router.get("/", (req, res) => {
+  const { search } = req.query;
+  res.json([]);
 });
 
 export default router;

@@ -17,6 +17,7 @@ router.use("/auth", authRoutes);
 
 // User routes
 router.use("/users", userRoutes);
+router.use("/api/v1/user", userRoutes);
 
 // Conversation routes
 router.use("/conversations", conversationRoutes);
