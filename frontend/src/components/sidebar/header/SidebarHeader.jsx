@@ -8,6 +8,7 @@ import ProfileEdit from "../../profile/ProfileEdit";
 import NewCommunity from "../../community/NewCommunity";
 import Stories from "../../stories/Stories";
 import NewChat from "../../Chat/NewChat";
+import AIChat from "../../chat/AIChat";
 export default function SidebarHeader() {
   const { user } = useSelector((state) => state.user);
   const [showMenu, setShowMenu] = useState(false);
@@ -16,6 +17,7 @@ export default function SidebarHeader() {
   const [showNewCommunity, setShowNewCommunity] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
   return (
     <>
       {/*Sidebar header*/}
@@ -45,6 +47,15 @@ export default function SidebarHeader() {
             <li>
               <button className="btn" onClick={() => setShowNewChat(true)}>
                 <ChatIcon className="dark:fill-dark_svg_1" />
+              </button>
+            </li>
+            <li>
+              <button 
+                className="btn" 
+                onClick={() => setShowAIChat(true)}
+                title="Chat with AI"
+              >
+                🤖
               </button>
             </li>
             <li
@@ -80,6 +91,10 @@ export default function SidebarHeader() {
       {/*New Chat*/}
       {showNewChat && (
         <NewChat setShowNewChat={setShowNewChat} />
+      )}
+      {/*AI Chat*/}
+      {showAIChat && (
+        <AIChat onClose={() => setShowAIChat(false)} />
       )}
     </>
   );

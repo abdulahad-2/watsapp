@@ -56,6 +56,15 @@ app.use(
 // API routes - direct mounting without /api/v1 prefix
 app.use("/", routes);
 
+// Health check endpoint for keep-alive
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // 404 handler
 app.use((req, res, next) => {
   next(createHttpError.NotFound("This route does not exist."));
