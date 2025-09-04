@@ -44,21 +44,24 @@ router.post("/login", (req, res) => {
   // Find existing user or create default
   const existingUser = userRouter.findUser ? userRouter.findUser(email) : null;
   
-  const userData = existingUser || {
-    _id: `user_${Date.now()}`,
-    name: email.split('@')[0],
-    email,
-    picture: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png",
-    status: "Hey there! I am using WhatsApp.",
-    token: `token_${Date.now()}`
-  };
-
-  // If user doesn't exist, add them
-  if (!existingUser) {
-    userRouter.addUser(userData);
+  let userData;
+  if (existingUser) {
+    // Use existing user data but update token
+    userData = {
+      ...existingUser,
+      token: `token_${Date.now()}`
+    };
   } else {
-    // Update token for existing user
-    userData.token = `token_${Date.now()}`;
+    // Create new user with defaults
+    userData = {
+      _id: `user_${Date.now()}`,
+      name: email.split('@')[0],
+      email,
+      picture: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png",
+      status: "Hey there! I am using WhatsApp.",
+      token: `token_${Date.now()}`
+    };
+    userRouter.addUser(userData);
   }
 
   // Immediate response - no processing delays
