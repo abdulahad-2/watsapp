@@ -25,11 +25,29 @@ const processQueue = (error, token = null) => {
 
 api.interceptors.request.use(
   (config) => {
+    // First try to get token from Redux store
     const state = store.getState();
-    const token = state.user?.user?.token;
+    let token = state.user?.user?.token;
+    
+    // If no token in Redux, check localStorage
+    if (!token) {
+      try {
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          const userData = JSON.parse(savedUser);
+          token = userData.token;
+          console.log('Using token from localStorage:', token);
+        }
+      } catch (error) {
+        console.error('Error reading token from localStorage:', error);
+      }
+    } else {
+      console.log('Current token:', token);
+    }
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Request headers:', config.headers);
     }
     return config;
   },

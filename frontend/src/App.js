@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,6 +9,7 @@ import {
 import { io } from "socket.io-client";
 import { Analytics } from "@vercel/analytics/react";
 import SocketContext from "./context/SocketContext";
+import { setUser } from "./features/userSlice";
 //Pages
 import Home from "./pages/home";
 import Login from "./pages/login";
@@ -22,9 +23,24 @@ const socket = io(SOCKET_URL);
 console.log("REACT_APP_API_ENDPOINT:", process.env.REACT_APP_API_ENDPOINT);
 
 function App() {
-  //const [connected, setConnected] = useState(false);
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
   const { token } = user;
+
+  // Hydrate Redux from localStorage on app start
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser && !token) {
+      try {
+        const userData = JSON.parse(savedUser);
+        console.log('Hydrating Redux from localStorage:', userData);
+        dispatch(setUser(userData));
+      } catch (error) {
+        console.error('Error hydrating from localStorage:', error);
+        localStorage.removeItem('user');
+      }
+    }
+  }, [dispatch, token]);
 
   // Listen for 401 errors and handle them smoothly
   useEffect(() => {

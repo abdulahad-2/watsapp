@@ -6,7 +6,19 @@ const loadUserFromStorage = () => {
   try {
     const savedUser = localStorage.getItem('user');
     console.log('Loading user from localStorage:', savedUser);
-    return savedUser ? JSON.parse(savedUser) : {
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      // Ensure we have all required fields
+      return {
+        id: userData.id || userData._id || "",
+        name: userData.name || "",
+        email: userData.email || "",
+        picture: userData.picture || "",
+        status: userData.status || "",
+        token: userData.token || "",
+      };
+    }
+    return {
       id: "",
       name: "",
       email: "",
