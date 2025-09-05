@@ -65,15 +65,24 @@ export const registerUser = createAsyncThunk(
         throw new Error("No token received from server");
       }
 
+      // Overlay local profile fields to persist client-side customizations
+      let savedLocal = null;
+      try {
+        savedLocal = JSON.parse(localStorage.getItem('user')) || null;
+      } catch (_) {}
+
       const id = response.user.id || response.user._id || "";
+      const mergedName = savedLocal?.name || response.user.name;
+      const mergedPicture = savedLocal?.picture || response.user.picture;
+      const mergedStatus = savedLocal?.status || response.user.status;
       return {
         user: {
           id,
           _id: response.user._id || id,
-          name: response.user.name,
+          name: mergedName,
           email: response.user.email,
-          picture: response.user.picture,
-          status: response.user.status,
+          picture: mergedPicture,
+          status: mergedStatus,
           token: response.user.token,
         },
       };
@@ -256,6 +265,5 @@ export const userSlice = createSlice({
 });
 
 export const { logout, changeStatus, setUser, updateUserProfile } = userSlice.actions;
-export { saveProfile };
 
 export default userSlice.reducer;

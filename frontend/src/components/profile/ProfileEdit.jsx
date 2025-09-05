@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import { ReturnIcon, ValidIcon } from "../../svg";
-import { updateUserProfile, saveProfile } from "../../features/userSlice";
+import { updateUserProfile } from "../../features/userSlice";
 import { toast } from "../../utils/toast";
 import { supabase } from "../../lib/supabase";
 
@@ -47,17 +47,14 @@ export default function ProfileEdit({ setShowProfileEdit }) {
     
     setLoading(true);
     try {
-      // Optimistic local update
+      // Pure client-side persistence: Redux + localStorage
       dispatch(updateUserProfile({ name, status, picture }));
-      // Persist to backend
-      const res = await dispatch(saveProfile({ name, status, picture }));
-      if (res.error) throw new Error(res.error.message || "Save failed");
-      console.log("Profile saved:", { name, status, picture });
+      console.log("Profile saved locally:", { name, status, picture });
       toast("Profile updated", { type: "success" });
       setShowProfileEdit(false);
     } catch (error) {
-      console.error("Failed to save profile:", error);
-      toast("Failed to save profile. Please try again.", { type: "error" });
+      console.error("Failed to save profile locally:", error);
+      toast("Failed to update profile. Please try again.", { type: "error" });
     }
     setLoading(false);
   };
