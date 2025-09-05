@@ -17,6 +17,7 @@ const loadUserFromStorage = () => {
         name: userData.name || "",
         email: userData.email || "",
         picture: userData.picture || "",
+        picturePublicId: userData.picturePublicId || "",
         status: userData.status || "",
         token: userData.token || "",
       };
@@ -27,6 +28,7 @@ const loadUserFromStorage = () => {
       name: "",
       email: "",
       picture: "",
+      picturePublicId: "",
       status: "",
       token: "",
     };
@@ -38,6 +40,7 @@ const loadUserFromStorage = () => {
       name: "",
       email: "",
       picture: "",
+      picturePublicId: "",
       status: "",
       token: "",
     };
@@ -75,6 +78,7 @@ export const registerUser = createAsyncThunk(
       const mergedName = savedLocal?.name || response.user.name;
       const mergedPicture = savedLocal?.picture || response.user.picture;
       const mergedStatus = savedLocal?.status || response.user.status;
+      const mergedPicturePublicId = savedLocal?.picturePublicId || "";
       return {
         user: {
           id,
@@ -82,6 +86,7 @@ export const registerUser = createAsyncThunk(
           name: mergedName,
           email: response.user.email,
           picture: mergedPicture,
+          picturePublicId: mergedPicturePublicId,
           status: mergedStatus,
           token: response.user.token,
         },

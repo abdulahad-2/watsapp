@@ -13,7 +13,12 @@ function Contact({ contact, setSearchResults, socket }) {
   };
   const openConversation = async () => {
     let newConvo = await dispatch(open_create_conversation(values));
-    socket.emit("join conversation", newConvo.payload._id);
+    const opened = newConvo?.payload?.conversation || newConvo?.payload;
+    if (opened && opened._id) {
+      socket.emit("join conversation", opened._id);
+    } else {
+      console.error("Failed to open conversation from search - invalid payload:", newConvo);
+    }
   };
   return (
     <li

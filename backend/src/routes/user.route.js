@@ -1,5 +1,6 @@
 import express from "express";
 import { createClient } from "@supabase/supabase-js";
+import { v2 as cloudinary } from "cloudinary";
 
 const router = express.Router();
 
@@ -25,6 +26,23 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
   } catch (e) {
     console.warn("⚠️ Failed to init Supabase admin client:", e?.message || e);
     supabaseAdmin = null;
+  }
+}
+
+// Cloudinary (for DP storage/deletion)
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || process.env.REACT_APP_CLOUD_NAME;
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || process.env.CLOUDINARY_API_SECRETE;
+if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
+  try {
+    cloudinary.config({
+      cloud_name: CLOUDINARY_CLOUD_NAME,
+      api_key: CLOUDINARY_API_KEY,
+      api_secret: CLOUDINARY_API_SECRET,
+    });
+    console.log("✅ Cloudinary configured");
+  } catch (e) {
+    console.warn("⚠️ Failed to configure Cloudinary:", e?.message || e);
   }
 }
 
@@ -302,6 +320,21 @@ router.put("/profile", (req, res) => {
     res.json({ message: "Profile updated successfully", user: registeredUsers[userIndex] });
   } else {
     res.status(404).json({ error: "User not found" });
+  }
+});
+
+// Delete a previous profile picture from Supabase Storage (requires SERVICE ROLE key)
+router.delete("/picture", async (req, res) => {
+  try {
+    const key = (req.query.key || "").toString();
+    if (!key) return res.status(400).json({ error: "key query param required" });
+    if (!supabaseAdmin) return res.status(501).json({ error: "Storage admin not configured" });
+
+    const { data, error } = await supabaseAdmin.storage.from("avatars").remove([key]);
+    if (error) return res.status(500).json({ error: error.message || "delete failed" });
+    return res.json({ deleted: true, data });
+  } catch (e) {
+    return res.status(500).json({ error: e?.message || "delete failed" });
   }
 });
 

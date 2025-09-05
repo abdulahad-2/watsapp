@@ -28,6 +28,9 @@ const io = new Server(server, {
   },
 });
 
+// Make io available to routes via req.app.get('io')
+app.set("io", io);
+
 // Socket authentication can be added later; for now allow connections
 
 io.on("connection", (socket) => {

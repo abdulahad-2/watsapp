@@ -3,7 +3,7 @@ import { getToken, dispatch } from "./storeAccess";
 
 // Create an axios instance with custom config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_ENDPOINT,
+  baseURL: process.env.REACT_APP_API_ENDPOINT || window.location.origin,
   headers: {
     "Content-Type": "application/json",
   },

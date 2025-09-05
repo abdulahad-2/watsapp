@@ -6,6 +6,7 @@ import { ReturnIcon, ValidIcon } from "../../svg";
 import { updateUserProfile } from "../../features/userSlice";
 import { toast } from "../../utils/toast";
 import { supabase } from "../../lib/supabase";
+import api from "../../lib/axiosConfig";
 
 export default function ProfileEdit({ setShowProfileEdit }) {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ export default function ProfileEdit({ setShowProfileEdit }) {
   const [status, setStatus] = useState(user.status || "");
   const [picture, setPicture] = useState(user.picture || "");
   const [loading, setLoading] = useState(false);
+  const [picturePublicId, setPicturePublicId] = useState(user.picturePublicId || "");
   const [myId, setMyId] = useState(user.id || user._id || "");
 
   // Fallback: if Redux doesn't have id, try Supabase auth user
@@ -48,13 +50,56 @@ export default function ProfileEdit({ setShowProfileEdit }) {
     setLoading(true);
     try {
       // Pure client-side persistence: Redux + localStorage
-      dispatch(updateUserProfile({ name, status, picture }));
+      dispatch(updateUserProfile({ name, status, picture, picturePublicId }));
       console.log("Profile saved locally:", { name, status, picture });
       toast("Profile updated", { type: "success" });
       setShowProfileEdit(false);
     } catch (error) {
       console.error("Failed to save profile locally:", error);
       toast("Failed to update profile. Please try again.", { type: "error" });
+    }
+    setLoading(false);
+  };
+
+  // Upload new avatar to Cloudinary (unsigned)
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const CLOUD_NAME = process.env.REACT_APP_CLOUD_NAME;
+    const UPLOAD_PRESET = process.env.REACT_APP_UPLOAD_PRESET;
+    if (!CLOUD_NAME || !UPLOAD_PRESET) {
+      toast("Cloudinary env missing", { type: "error" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("upload_preset", UPLOAD_PRESET);
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
+      const res = await fetch(uploadUrl, { method: "POST", body: form });
+      const data = await res.json();
+      if (!data?.secure_url || !data?.public_id) {
+        throw new Error("Upload failed");
+      }
+
+      // Delete previous image if we have a public_id stored
+      if (picturePublicId) {
+        try {
+          await api.delete(`/users/picture/cloudinary`, { params: { public_id: picturePublicId } });
+        } catch (delErr) {
+          console.warn("Old avatar delete failed (continuing):", delErr?.message || delErr);
+        }
+      }
+
+      // Update local state and store
+      setPicture(data.secure_url);
+      setPicturePublicId(data.public_id);
+      dispatch(updateUserProfile({ picture: data.secure_url, picturePublicId: data.public_id }));
+      toast("Picture updated", { type: "success" });
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      toast("Upload failed", { type: "error" });
     }
     setLoading(false);
   };
@@ -95,6 +140,13 @@ export default function ProfileEdit({ setShowProfileEdit }) {
               className="w-full h-full object-cover"
             />
           </div>
+          {/* File uploader */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full p-2 bg-dark_bg_3 border border-dark_border_1 rounded text-dark_text_1 focus:outline-none focus:border-green_1 mb-2"
+          />
           <input
             type="url"
             placeholder="Profile picture URL"

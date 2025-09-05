@@ -1,18 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 
 // ------------------------
-// CRA env-driven Supabase URL & Key (fallback to hardcoded if missing)
+// CRA env-driven Supabase URL & Key
 // ------------------------
-let supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-let supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn(
-    "REACT_APP_SUPABASE_URL/REACT_APP_SUPABASE_ANON_KEY not found; falling back to hardcoded values."
+    "REACT_APP_SUPABASE_URL or REACT_APP_SUPABASE_ANON_KEY is missing."
   );
-  supabaseUrl = "https://cwbobklimbexftagrouh.supabase.co";
-  supabaseKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3Ym9ia2xpbWJleGZ0YWdyb3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MDM1MTIsImV4cCI6MjA3MTk3OTUxMn0.Ovvty8xTd3DX6KgRMjiw4WxGW6zly5RmHHKFwdl7MRQ";
 }
 
 // ------------------------

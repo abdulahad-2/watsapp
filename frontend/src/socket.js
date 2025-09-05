@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
-// Use Vite env variable or fallback
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
+// Use CRA env variable or fallback to API endpoint origin
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_API_ENDPOINT || window.location.origin;
 
 const socket = io(SOCKET_URL);
 
