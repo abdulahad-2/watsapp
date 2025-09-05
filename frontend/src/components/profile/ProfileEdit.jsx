@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import { ReturnIcon, ValidIcon } from "../../svg";
 import { updateUserProfile } from "../../features/userSlice";
+import { toast } from "../../utils/toast";
 
 export default function ProfileEdit({ setShowProfileEdit }) {
   const dispatch = useDispatch();
@@ -24,11 +25,11 @@ export default function ProfileEdit({ setShowProfileEdit }) {
       // Update user profile in Redux store and localStorage
       dispatch(updateUserProfile({ name, status, picture }));
       console.log("Profile updated:", { name, status, picture });
-      alert("Profile updated successfully!");
+      toast("Profile updated", { type: "success" });
       setShowProfileEdit(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
-      alert("Failed to update profile. Please try again.");
+      toast("Failed to update profile. Please try again.", { type: "error" });
     }
     setLoading(false);
   };
@@ -58,48 +59,7 @@ export default function ProfileEdit({ setShowProfileEdit }) {
           </button>
         </div>
 
-        {/* Shareable User ID + Copy actions */}
-        <div className="mb-6 p-3 rounded bg-dark_bg_3 border border-dark_border_1">
-          <p className="text-xs text-dark_text_2 mb-2">My ID</p>
-          <div className="flex items-center justify-between gap-2">
-            <code className="text-[11px] break-all text-dark_text_1 bg-dark_bg_1 px-2 py-1 rounded flex-1">
-              {user.id || "—"}
-            </code>
-            <button
-              type="button"
-              className="btn whitespace-nowrap"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(user.id || "");
-                  alert("ID copied to clipboard");
-                } catch (e) {
-                  console.error("Copy ID failed", e);
-                }
-              }}
-            >
-              Copy ID
-            </button>
-          </div>
-          <div className="flex items-center justify-between gap-2 mt-3">
-            <span className="text-xs text-dark_text_2">Share link</span>
-            <button
-              type="button"
-              className="btn"
-              onClick={async () => {
-                const base = window.location.origin;
-                const link = `${base}/add-contact?id=${encodeURIComponent(user.id || "")}`;
-                try {
-                  await navigator.clipboard.writeText(link);
-                  alert("Share link copied");
-                } catch (e) {
-                  console.error("Copy link failed", e);
-                }
-              }}
-            >
-              Copy Link
-            </button>
-          </div>
-        </div>
+        
 
         {/* Profile Picture */}
         <div className="flex flex-col items-center mb-6">
@@ -145,6 +105,58 @@ export default function ProfileEdit({ setShowProfileEdit }) {
             onChange={(e) => setStatus(e.target.value)}
             className="w-full p-2 bg-dark_bg_3 border border-dark_border_1 rounded text-dark_text_1 focus:outline-none focus:border-green_1"
           />
+        </div>
+
+        {/* Shareable User ID + Copy actions (after Status) */}
+        <div className="mb-2 text-xs text-dark_text_2">Share your ID so others can add you.</div>
+        <div className="mb-2 p-3 rounded bg-dark_bg_3/80 border border-dark_border_1">
+          <p className="text-xs text-dark_text_2 mb-2">My ID</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={user.id || user._id || "—"}
+              className="flex-1 px-2 py-1 rounded bg-dark_bg_1 text-dark_text_1 text-xs border border-dark_border_1 focus:outline-none"
+            />
+            <button
+              type="button"
+              className="btn px-3 py-1"
+              onClick={async () => {
+                try {
+                  const val = user.id || user._id || "";
+                  await navigator.clipboard.writeText(val);
+                  toast("ID copied", { type: "success" });
+                } catch (e) {
+                  console.error("Copy ID failed", e);
+                }
+              }}
+            >
+              Copy ID
+            </button>
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              type="text"
+              readOnly
+              value={`${window.location.origin}/add-contact?id=${encodeURIComponent(user.id || user._id || "")}`}
+              className="flex-1 px-2 py-1 rounded bg-dark_bg_1 text-dark_text_1 text-xs border border-dark_border_1 focus:outline-none"
+            />
+            <button
+              type="button"
+              className="btn px-3 py-1"
+              onClick={async () => {
+                const link = `${window.location.origin}/add-contact?id=${encodeURIComponent(user.id || user._id || "")}`;
+                try {
+                  await navigator.clipboard.writeText(link);
+                  toast("Share link copied", { type: "success" });
+                } catch (e) {
+                  console.error("Copy link failed", e);
+                }
+              }}
+            >
+              Copy Link
+            </button>
+          </div>
         </div>
       </div>
     </div>
