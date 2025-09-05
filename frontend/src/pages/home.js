@@ -186,8 +186,8 @@ function Home({ socket }) {
   }, [dispatch, socket]);
   return (
     React.createElement(React.Fragment, null,
-      React.createElement("div", { className: "h-screen dark:bg-dark_bg_1 flex items-center justify-center overflow-hidden" },
-        React.createElement("div", { className: "container h-screen flex py-[19px]" },
+      React.createElement("div", { className: "min-h-screen h-screen dark:bg-dark_bg_1 flex items-stretch justify-center overflow-hidden" },
+        React.createElement("div", { className: "container mx-auto w-full h-full flex flex-col md:flex-row gap-0 md:gap-[0px] py-[12px] md:py-[19px] px-0 md:px-[0px]" },
           React.createElement(Sidebar, { onlineUsers: onlineUsers, typing: typing }),
           (activeConversation?.id || activeConversation?._id)
             ? React.createElement(ChatContainer, { onlineUsers: onlineUsers, callUser: callUser, typing: typing })

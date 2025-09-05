@@ -9,7 +9,7 @@ import React from 'react';
 export default function Sidebar({ onlineUsers, typing }) {
   const [searchResults, setSearchResults] = useState([]);
   return (
-    <div className="flex0030 max-w-[30%] h-full select-none">
+    <div className="w-full md:max-w-[30%] md:flex-[0_0_30%] h-full select-none border-b md:border-b-0 md:border-r dark:border-dark_border_2 overflow-hidden">
       {/*Sidebar Header*/}
       <SidebarHeader />
       {/*Notifications */}
@@ -19,6 +19,7 @@ export default function Sidebar({ onlineUsers, typing }) {
         searchLength={searchResults.length}
         setSearchResults={setSearchResults}
       />
+      <div className="h-[calc(100%-160px)] overflow-y-auto custom-scrollbar px-2">
       {searchResults.length > 0 ? (
         <>
           {/*Search results*/}
@@ -33,6 +34,7 @@ export default function Sidebar({ onlineUsers, typing }) {
           <Conversations onlineUsers={onlineUsers} typing={typing} />
         </>
       )}
+      </div>
     </div>
   );
 }

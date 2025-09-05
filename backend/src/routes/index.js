@@ -5,6 +5,7 @@ import conversationRoutes from "./conversation.route.js";
 import messageRoutes from "./message.route.js";
 import communityRoutes from "./community.route.js";
 import aiRoutes from "./ai.route.js";
+import adminRoutes from "./admin.route.js";
 
 const router = express.Router();
 
@@ -32,5 +33,8 @@ router.use("/communities", communityRoutes);
 
 // AI routes
 router.use("/ai", aiRoutes);
+
+// Admin routes (protected by ADMIN_SECRET header)
+router.use("/admin", adminRoutes);
 
 export default router;

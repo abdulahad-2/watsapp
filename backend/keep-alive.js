@@ -2,7 +2,7 @@
 const https = require('https');
 
 const BACKEND_URL = 'https://watsapp-backend-mscv.onrender.com';
-const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes (Render sleeps after 15 minutes)
+const PING_INTERVAL = 10 * 60 * 1000; // 10 minutes (Render sleeps after 15 minutes)
 
 function pingServer() {
   const url = `${BACKEND_URL}/health`;
@@ -14,9 +14,7 @@ function pingServer() {
   });
 }
 
-// Start keep-alive pings
-console.log('Starting keep-alive service...');
-setInterval(pingServer, PING_INTERVAL);
-
-// Initial ping
+// Start keep-alive pings (one-time startup ping + interval)
+console.log(`Keep-alive service started. Pinging ${BACKEND_URL}/health every ${PING_INTERVAL / 60000} minutes...`);
 pingServer();
+setInterval(pingServer, PING_INTERVAL);

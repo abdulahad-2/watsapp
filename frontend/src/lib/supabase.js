@@ -38,6 +38,15 @@ const withRetry = async (operation, maxRetries = 3) => {
     try {
       return await operation();
     } catch (error) {
+      const msg = error?.message || String(error);
+      const isAuthKnown =
+        msg.includes("Email not confirmed") ||
+        msg.includes("Invalid login credentials") ||
+        msg.includes("invalid login credentials");
+      // Do not retry on known immediate auth failures
+      if (isAuthKnown) {
+        throw error;
+      }
       console.error(`Retry attempt ${i + 1}/${maxRetries} failed:`, error);
       lastError = error;
       if (i < maxRetries - 1) {
@@ -77,6 +86,7 @@ export const auth = {
 
   signOut: () => supabase.auth.signOut(),
   getUser: () => supabase.auth.getUser(),
+  getSession: () => supabase.auth.getSession(),
   onAuthStateChange: (callback) => supabase.auth.onAuthStateChange(callback),
 };
 
