@@ -3,8 +3,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = express.Router();
 
-// Gemini init
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Gemini init with key check
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error("GEMINI_API_KEY is missing. AI routes will return 500 until it's set.");
+}
+const genAI = new GoogleGenerativeAI(apiKey || "");
 
 // Chat endpoint
 router.post("/chat", async (req, res) => {
@@ -17,7 +21,8 @@ router.post("/chat", async (req, res) => {
       });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Use a supported Gemini model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // build prompt
     let prompt = "You are a helpful AI assistant in a WhatsApp-like chat application. Be friendly.\n\n";
@@ -40,12 +45,12 @@ router.post("/chat", async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Gemini AI Error:", error);
+    console.error("Gemini AI Error:", error?.message || error);
     res.status(500).json({
       error: {
         status: 500,
         message: "Failed to generate AI response",
-        details: error.message,
+        details: error?.message || "Unknown error",
       },
     });
   }
