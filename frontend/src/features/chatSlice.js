@@ -5,10 +5,19 @@ import api from "../lib/axiosConfig";
 const CONVERSATION_ENDPOINT = "conversation";
 const MESSAGE_ENDPOINT = "message";
 
+// Load conversations/messages from localStorage
+const loadConversations = () => {
+  try {
+    return JSON.parse(localStorage.getItem('conversations')) || [];
+  } catch (_) {
+    return [];
+  }
+};
+
 const initialState = {
   status: "",
   error: "",
-  conversations: [],
+  conversations: loadConversations(),
   activeConversation: {},
   messages: [],
   notifications: [],
@@ -140,6 +149,7 @@ export const chatSlice = createSlice({
       );
       newConvos.unshift(conversation);
       state.conversations = newConvos;
+      try { localStorage.setItem('conversations', JSON.stringify(state.conversations)); } catch (_) {}
     },
     addFiles: (state, action) => {
       state.files = [...state.files, action.payload];
@@ -175,7 +185,10 @@ export const chatSlice = createSlice({
       })
       .addCase(getConversations.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.conversations = action.payload;
+        const incoming = Array.isArray(action.payload) ? action.payload : [];
+        // Prefer local persisted if available and non-empty
+        state.conversations = loadConversations().length ? loadConversations() : incoming;
+        try { localStorage.setItem('conversations', JSON.stringify(state.conversations)); } catch (_) {}
       })
       .addCase(getConversations.rejected, (state, action) => {
         state.status = "failed";
@@ -188,6 +201,15 @@ export const chatSlice = createSlice({
         state.status = "succeeded";
         const convo = action.payload?.conversation || action.payload;
         state.activeConversation = convo || {};
+        if (convo && convo._id) {
+          const exists = state.conversations.find((c) => c._id === convo._id);
+          if (!exists) {
+            state.conversations = [convo, ...state.conversations];
+          } else {
+            state.conversations = [convo, ...state.conversations.filter(c => c._id !== convo._id)];
+          }
+          try { localStorage.setItem('conversations', JSON.stringify(state.conversations)); } catch (_) {}
+        }
         state.files = [];
       })
       .addCase(open_create_conversation.rejected, (state, action) => {
@@ -221,6 +243,7 @@ export const chatSlice = createSlice({
         newConvos.unshift(conversation);
         state.conversations = newConvos;
         state.files = [];
+        try { localStorage.setItem('conversations', JSON.stringify(state.conversations)); } catch (_) {}
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.status = "failed";

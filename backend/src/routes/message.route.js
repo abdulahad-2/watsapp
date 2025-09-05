@@ -19,7 +19,8 @@ router.post("/", (req, res) => {
   return res.status(201).json(payload);
 });
 router.get("/:convo_id", (req, res) => {
-  res.json({ message: "Messages retrieved", messages: [] });
+  // Frontend expects an array of messages for a conversation
+  res.json([]);
 });
 
 router.post("/:convo_id", (req, res) => {
