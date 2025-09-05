@@ -35,7 +35,7 @@ function ChatActions({ socket }) {
     try {
       let newMsg = await dispatch(sendMessage(values));
       if (newMsg.payload && newMsg.meta.requestStatus === 'fulfilled') {
-        socket.emit("send message", newMsg.payload);
+        // Do not emit via socket here; server already broadcasts to the room
         setMessage("");
       } else {
         console.error("Message sending failed:", newMsg);

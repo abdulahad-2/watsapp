@@ -275,17 +275,18 @@ export const chatSlice = createSlice({
         state.status = "loading";
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
+        // Do NOT append to messages here to avoid duplicates.
+        // The socket 'receive message' handler will append for both sender and receiver.
         state.status = "succeeded";
-        state.messages = [...state.messages, action.payload];
-        // Preserve users from existing conversation or activeConversation to avoid 'Unknown'
-        const existing = state.conversations.find(c => c._id === action.payload.conversation._id) || {};
+        const payload = action.payload;
+        const existing = state.conversations.find(c => c._id === payload.conversation._id) || {};
         let conversation = {
           ...existing,
-          ...action.payload.conversation,
+          ...payload.conversation,
           users: (existing.users && existing.users.length)
             ? existing.users
-            : (state.activeConversation._id === action.payload.conversation._id ? state.activeConversation.users : action.payload.conversation.users),
-          latestMessage: action.payload,
+            : (state.activeConversation._id === payload.conversation._id ? state.activeConversation.users : payload.conversation.users),
+          latestMessage: payload,
         };
         let newConvos = [...state.conversations].filter(
           (c) => c._id !== conversation._id

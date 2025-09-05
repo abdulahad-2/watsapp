@@ -51,6 +51,9 @@ function Home({ socket }) {
     socket.on("get-online-users", (users) => {
       setOnlineUsers(users);
     });
+    return () => {
+      socket.off("get-online-users");
+    };
   }, [user, socket]);
 
   //call
@@ -77,6 +80,11 @@ function Home({ socket }) {
         connectionRef?.current?.destroy();
       }
     });
+    return () => {
+      socket.off("setup socket");
+      socket.off("call user");
+      socket.off("end call");
+    };
   }, [call, callAccepted, socket]);
   //--call user funcion
   const callUser = () => {
@@ -177,6 +185,7 @@ function Home({ socket }) {
     if (!Array.isArray(conversations)) return;
     const ids = conversations.map((c) => c?._id).filter(Boolean);
     ids.forEach((id) => {
+      console.log("Joining room:", id);
       socket.emit("join conversation", id);
     });
   }, [conversations, socket]);
@@ -192,6 +201,12 @@ function Home({ socket }) {
     socket.on("message deleted", ({ messageId, conversationId }) => {
       dispatch(removeMessage({ messageId, convo_id: conversationId }));
     });
+    return () => {
+      socket.off("receive message");
+      socket.off("typing");
+      socket.off("stop typing");
+      socket.off("message deleted");
+    };
   }, [dispatch, socket]);
   return (
     React.createElement(React.Fragment, null,
