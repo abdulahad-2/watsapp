@@ -15,6 +15,7 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import TestConnection from "./pages/TestConnection";
+import AddContact from "./pages/AddContact";
 // socket io - use Vite envs
 const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
@@ -99,6 +100,11 @@ function App() {
             exact: true,
             path: "/test-connection",
             element: React.createElement(TestConnection),
+          }),
+          React.createElement(Route, {
+            exact: true,
+            path: "/add-contact",
+            element: React.createElement(AddContact),
           })
         )
       ),

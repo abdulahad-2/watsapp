@@ -58,6 +58,49 @@ export default function ProfileEdit({ setShowProfileEdit }) {
           </button>
         </div>
 
+        {/* Shareable User ID + Copy actions */}
+        <div className="mb-6 p-3 rounded bg-dark_bg_3 border border-dark_border_1">
+          <p className="text-xs text-dark_text_2 mb-2">My ID</p>
+          <div className="flex items-center justify-between gap-2">
+            <code className="text-[11px] break-all text-dark_text_1 bg-dark_bg_1 px-2 py-1 rounded flex-1">
+              {user.id || "—"}
+            </code>
+            <button
+              type="button"
+              className="btn whitespace-nowrap"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(user.id || "");
+                  alert("ID copied to clipboard");
+                } catch (e) {
+                  console.error("Copy ID failed", e);
+                }
+              }}
+            >
+              Copy ID
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-2 mt-3">
+            <span className="text-xs text-dark_text_2">Share link</span>
+            <button
+              type="button"
+              className="btn"
+              onClick={async () => {
+                const base = window.location.origin;
+                const link = `${base}/add-contact?id=${encodeURIComponent(user.id || "")}`;
+                try {
+                  await navigator.clipboard.writeText(link);
+                  alert("Share link copied");
+                } catch (e) {
+                  console.error("Copy link failed", e);
+                }
+              }}
+            >
+              Copy Link
+            </button>
+          </div>
+        </div>
+
         {/* Profile Picture */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4">

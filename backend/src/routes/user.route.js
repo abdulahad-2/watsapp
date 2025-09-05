@@ -63,6 +63,40 @@ router.get("/search", async (req, res) => {
     return res.json([]);
   }
 
+  // If the search looks like a UUID (Supabase user id), prefer exact ID search
+  const looksLikeUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    search.trim()
+  );
+
+  if (looksLikeUUID) {
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("id, name, email, picture, status")
+          .eq("id", search.trim())
+          .single();
+
+        if (error && error.code !== "PGRST116") throw error; // not found vs other errors
+        if (!data) return res.json([]);
+
+        const user = {
+          _id: data.id,
+          name: data.name || data.email?.split("@")[0],
+          email: data.email,
+          picture: data.picture,
+          status: data.status || "Hey there! I am using WhatsApp.",
+        };
+        return res.json([user]);
+      } catch (e) {
+        console.warn("Supabase ID lookup failed, falling back to memory:", e?.message || e);
+      }
+    }
+
+    const found = registeredUsers.find((u) => (u._id || u.id) === search.trim());
+    return res.json(found ? [found] : []);
+  }
+
   // Prefer Supabase search if configured
   if (supabase) {
     try {
@@ -98,12 +132,79 @@ router.get("/search", async (req, res) => {
   res.json(filteredUsers);
 });
 
+// Direct lookup by ID endpoint: /users/by-id/:id
+router.get("/by-id/:id", async (req, res) => {
+  const id = req.params.id?.trim();
+  if (!id) return res.json([]);
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, name, email, picture, status")
+        .eq("id", id)
+        .single();
+
+      if (error && error.code !== "PGRST116") throw error; // treat not found as empty
+      if (!data) return res.json([]);
+
+      const user = {
+        _id: data.id,
+        name: data.name || data.email?.split("@")[0],
+        email: data.email,
+        picture: data.picture,
+        status: data.status || "Hey there! I am using WhatsApp.",
+      };
+      return res.json([user]);
+    } catch (e) {
+      console.warn("Supabase ID lookup failed:", e?.message || e);
+    }
+  }
+
+  const found = registeredUsers.find((u) => (u._id || u.id) === id);
+  return res.json(found ? [found] : []);
+});
+
 // Also handle GET / with search query for /api/v1/user?search=
 router.get("/", async (req, res) => {
   const { search } = req.query;
 
   if (!search || search.trim().length === 0) {
     return res.json([]);
+  }
+
+  // If the search looks like a UUID (Supabase user id), prefer exact ID search
+  const looksLikeUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    search.trim()
+  );
+
+  if (looksLikeUUID) {
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("id, name, email, picture, status")
+          .eq("id", search.trim())
+          .single();
+
+        if (error && error.code !== "PGRST116") throw error; // not found vs other errors
+        if (!data) return res.json([]);
+
+        const user = {
+          _id: data.id,
+          name: data.name || data.email?.split("@")[0],
+          email: data.email,
+          picture: data.picture,
+          status: data.status || "Hey there! I am using WhatsApp.",
+        };
+        return res.json([user]);
+      } catch (e) {
+        console.warn("Supabase ID lookup failed, falling back to memory:", e?.message || e);
+      }
+    }
+
+    const found = registeredUsers.find((u) => (u._id || u.id) === search.trim());
+    return res.json(found ? [found] : []);
   }
 
   // Prefer Supabase search if configured

@@ -12,15 +12,14 @@ export default function Search({ searchLength, setSearchResults }) {
   const handleSearch = useCallback(async (searchTerm) => {
     if (searchTerm && searchTerm.trim().length > 0) {
       try {
-        const { data } = await axios.get(
-          `${(process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000").replace(/\/$/, '')}/api/v1/user?search=${searchTerm}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Search results:", data); // Debug log
+        const base = (process.env.REACT_APP_API_ENDPOINT || "http://localhost:5000").replace(/\/$/, '');
+        const url = `${base}/users/by-id/${encodeURIComponent(searchTerm.trim())}`;
+        const { data } = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Search results (by id):", data);
         setSearchResults(data);
       } catch (error) {
         console.log("Search error:", error.response?.data?.error?.message || error.message);
@@ -62,7 +61,7 @@ export default function Search({ searchLength, setSearchResults }) {
             )}
             <input
               type="text"
-              placeholder="Search or start a new chat"
+              placeholder="Search by User ID"
               className="input"
               onFocus={() => setShow(true)}
               onBlur={() => searchLength === 0 && setShow(false)}
