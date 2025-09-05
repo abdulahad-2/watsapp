@@ -1,6 +1,7 @@
 import axios from "axios";
 import { store } from "./app/store";
 import { logout, setUser } from "./features/userSlice";
+import { supabase } from "./lib/supabase";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_ENDPOINT,
@@ -24,36 +25,42 @@ const processQueue = (error, token = null) => {
 };
 
 api.interceptors.request.use(
-  (config) => {
-    // First try to get token from Redux store
+  async (config) => {
+    // 1) Prefer Supabase session access token
+    try {
+      const { data } = await supabase.auth.getSession();
+      const supaToken = data?.session?.access_token;
+      if (supaToken) {
+        config.headers.Authorization = `Bearer ${supaToken}`;
+        return config;
+      }
+    } catch (e) {
+      console.warn("Supabase getSession failed:", e?.message || e);
+    }
+
+    // 2) Fallback to Redux/localStorage token for backward compatibility
     const state = store.getState();
     let token = state.user?.user?.token;
-    
-    // If no token in Redux, check localStorage
+
     if (!token) {
       try {
-        const savedUser = localStorage.getItem('user');
+        const savedUser = localStorage.getItem("user");
         if (savedUser) {
           const userData = JSON.parse(savedUser);
           token = userData.token;
-          console.log('Using token from localStorage:', token);
         }
       } catch (error) {
-        console.error('Error reading token from localStorage:', error);
+        console.error("Error reading token from localStorage:", error);
       }
-    } else {
-      console.log('Current token:', token);
     }
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Request headers:', config.headers);
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(

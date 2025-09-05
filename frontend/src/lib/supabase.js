@@ -1,14 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 
 // ------------------------
-// Static Supabase URL & Key
+// CRA env-driven Supabase URL & Key (fallback to hardcoded if missing)
 // ------------------------
-const supabaseUrl = "https://cwbobklimbexftagrouh.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3Ym9ia2xpbWJleGZ0YWdyb3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MDM1MTIsImV4cCI6MjA3MTk3OTUxMn0.Ovvty8xTd3DX6KgRMjiw4WxGW6zly5RmHHKFwdl7MRQ";
+let supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+let supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing Supabase environment variables");
+  console.warn(
+    "REACT_APP_SUPABASE_URL/REACT_APP_SUPABASE_ANON_KEY not found; falling back to hardcoded values."
+  );
+  supabaseUrl = "https://cwbobklimbexftagrouh.supabase.co";
+  supabaseKey =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3Ym9ia2xpbWJleGZ0YWdyb3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MDM1MTIsImV4cCI6MjA3MTk3OTUxMn0.Ovvty8xTd3DX6KgRMjiw4WxGW6zly5RmHHKFwdl7MRQ";
 }
 
 // ------------------------
