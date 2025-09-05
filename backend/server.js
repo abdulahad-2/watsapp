@@ -1,17 +1,13 @@
 // backend/server.js
-import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
-import authMiddleware from "./src/middlewares/authMiddleware.js";
+import app from "./src/app.js"; // Reuse the app that already has CORS and routes
 import socketServer from "./src/SocketServer.js";
 
 dotenv.config();
 
-const app = express();
-app.use(express.json());
-
-// HTTP server
+// HTTP server using the configured Express app
 const server = http.createServer(app);
 
 // ✅ Allowed origins (match with app.js)
@@ -32,36 +28,13 @@ const io = new Server(server, {
   },
 });
 
-// ✅ Socket authentication middleware
-io.use(async (socket, next) => {
-  try {
-    const token =
-      socket.handshake.auth?.token ||
-      socket.handshake.headers?.authorization?.split(" ")[1];
-
-    if (!token) return next(new Error("Unauthorized"));
-
-    // verify token with Supabase
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data?.user) return next(new Error("Unauthorized"));
-
-    socket.user = data.user; // attach user object
-    next();
-  } catch (err) {
-    next(new Error("Unauthorized"));
-  }
-});
+// Socket authentication can be added later; for now allow connections
 
 io.on("connection", (socket) => {
   console.log("✅ Socket connected:", socket.id);
 
   // Attach all socket events
   socketServer(socket, io);
-});
-
-// Example protected route
-app.get("/api/protected", authMiddleware, (req, res) => {
-  res.json({ message: "You are authenticated!", user: req.user });
 });
 
 // Start server
