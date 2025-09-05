@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import SocketContext from "../../../context/SocketContext";
-import { open_create_conversation } from "../../../features/chatSlice";
+import { open_create_conversation, patchConversationUsers } from "../../../features/chatSlice";
 import {
   getConversationId,
   getConversationName,
@@ -10,6 +10,7 @@ import { dateHandler } from "../../../utils/date";
 import { capitalize } from "../../../utils/string";
 import React from 'react';
 import { toast } from "../../../utils/toast";
+import api from "../../../lib/axiosConfig";
 
 function Conversation({ convo, socket, online, typing }) {
   const dispatch = useDispatch();
@@ -39,6 +40,10 @@ function Conversation({ convo, socket, online, typing }) {
     const other = convo.users.find((u) => pickId(u) && pickId(u) !== myId);
     finalReceiverId = pickId(other);
   }
+  // If still missing and it's a 1:1 convo with empty users, use convo._id as receiver hint
+  if (!convo.isGroup && !finalReceiverId && (!convo.users || convo.users.length === 0)) {
+    finalReceiverId = convo._id;
+  }
 
   const values = {
     receiver_id: finalReceiverId,
@@ -49,6 +54,43 @@ function Conversation({ convo, socket, online, typing }) {
   
   // Debug logging (removed to reduce console spam)
   
+  // If conversation renders as Unknown but we can infer a receiver id, fetch and patch users
+  React.useEffect(() => {
+    const run = async () => {
+      try {
+        if (convo.isGroup) return;
+        if (!finalReceiverId) return;
+        const name = getConversationName(user, convo.users || []);
+        if (name && name !== "Unknown") return;
+        const { data } = await api.get(`/users/by-id/${finalReceiverId}`);
+        const other = Array.isArray(data) ? data[0] : data;
+        if (other && (other._id || other.id)) {
+          const meUser = {
+            _id: user._id || user.id,
+            id: user.id || user._id,
+            name: user.name,
+            email: user.email,
+            picture: user.picture,
+            status: user.status,
+          };
+          const otherUser = {
+            _id: other._id || other.id,
+            id: other.id || other._id,
+            name: other.name || other.email?.split("@")[0] || "User",
+            email: other.email,
+            picture: other.picture,
+            status: other.status,
+          };
+          dispatch(patchConversationUsers({ convo_id: convo._id, users: [meUser, otherUser] }));
+        }
+      } catch (e) {
+        console.warn("Failed to enrich conversation users:", e?.message || e);
+      }
+    };
+    run();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [convo._id, finalReceiverId]);
+
   const openConversation = async () => {
     // Skip if conversation has incomplete data
     if (!convo.isGroup && convo.users && convo.users.length === 1) {

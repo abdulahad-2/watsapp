@@ -205,6 +205,20 @@ export const chatSlice = createSlice({
           remainingMessages[remainingMessages.length - 1] || null;
       }
     },
+    // Patch users array for a conversation when we fetch missing user info
+    patchConversationUsers: (state, action) => {
+      const { convo_id, users } = action.payload || {};
+      if (!convo_id || !Array.isArray(users)) return;
+      // Update activeConversation
+      if (state.activeConversation && state.activeConversation._id === convo_id) {
+        state.activeConversation = { ...state.activeConversation, users };
+      }
+      // Update list
+      state.conversations = state.conversations.map((c) =>
+        c._id === convo_id ? { ...c, users } : c
+      );
+      try { localStorage.setItem('conversations', JSON.stringify(state.conversations)); } catch (_) {}
+    },
   },
   extraReducers(builder) {
     builder
