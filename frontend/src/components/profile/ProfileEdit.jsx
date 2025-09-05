@@ -5,6 +5,7 @@ import { ClipLoader } from "react-spinners";
 import { ReturnIcon, ValidIcon } from "../../svg";
 import { updateUserProfile } from "../../features/userSlice";
 import { toast } from "../../utils/toast";
+import { supabase } from "../../lib/supabase";
 
 export default function ProfileEdit({ setShowProfileEdit }) {
   const dispatch = useDispatch();
@@ -13,6 +14,30 @@ export default function ProfileEdit({ setShowProfileEdit }) {
   const [status, setStatus] = useState(user.status || "");
   const [picture, setPicture] = useState(user.picture || "");
   const [loading, setLoading] = useState(false);
+  const [myId, setMyId] = useState(user.id || user._id || "");
+
+  // Fallback: if Redux doesn't have id, try Supabase auth user
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (!myId) {
+          // Prefer session (faster) then fallback to getUser
+          const s = await supabase.auth.getSession();
+          const sessionUserId = s?.data?.session?.user?.id;
+          if (sessionUserId && mounted) {
+            setMyId(sessionUserId);
+            return;
+          }
+          const { data, error } = await supabase.auth.getUser();
+          if (!error && data?.user?.id && mounted) setMyId(data.user.id);
+        }
+      } catch (_) {}
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [myId]);
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -115,7 +140,7 @@ export default function ProfileEdit({ setShowProfileEdit }) {
             <input
               type="text"
               readOnly
-              value={user.id || user._id || "—"}
+              value={myId || "—"}
               className="flex-1 px-2 py-1 rounded bg-dark_bg_1 text-dark_text_1 text-xs border border-dark_border_1 focus:outline-none"
             />
             <button
@@ -123,7 +148,7 @@ export default function ProfileEdit({ setShowProfileEdit }) {
               className="btn px-3 py-1"
               onClick={async () => {
                 try {
-                  const val = user.id || user._id || "";
+                  const val = myId || "";
                   await navigator.clipboard.writeText(val);
                   toast("ID copied", { type: "success" });
                 } catch (e) {
@@ -138,14 +163,14 @@ export default function ProfileEdit({ setShowProfileEdit }) {
             <input
               type="text"
               readOnly
-              value={`${window.location.origin}/add-contact?id=${encodeURIComponent(user.id || user._id || "")}`}
+              value={`${window.location.origin}/add-contact?id=${encodeURIComponent(myId || "")}`}
               className="flex-1 px-2 py-1 rounded bg-dark_bg_1 text-dark_text_1 text-xs border border-dark_border_1 focus:outline-none"
             />
             <button
               type="button"
               className="btn px-3 py-1"
               onClick={async () => {
-                const link = `${window.location.origin}/add-contact?id=${encodeURIComponent(user.id || user._id || "")}`;
+                const link = `${window.location.origin}/add-contact?id=${encodeURIComponent(myId || "")}`;
                 try {
                   await navigator.clipboard.writeText(link);
                   toast("Share link copied", { type: "success" });

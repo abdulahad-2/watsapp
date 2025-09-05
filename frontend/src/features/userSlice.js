@@ -62,7 +62,7 @@ export const registerUser = createAsyncThunk(
 
       return {
         user: {
-          id: response.user._id,
+          id: response.user.id || response.user._id || "",
           name: response.user.name,
           email: response.user.email,
           picture: response.user.picture,
@@ -89,7 +89,7 @@ export const loginUser = createAsyncThunk(
 
       return {
         user: {
-          id: response.user._id,
+          id: response.user.id || response.user._id || "",
           name: response.user.name,
           email: response.user.email,
           picture: response.user.picture,
