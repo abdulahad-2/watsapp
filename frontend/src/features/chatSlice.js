@@ -39,16 +39,25 @@ export const getConversations = createAsyncThunk(
 export const open_create_conversation = createAsyncThunk(
   "conervsation/open_create",
   async (values, { getState, rejectWithValue }) => {
-    const { receiver_id, isGroup, convo_id } = values;
+    const { receiver_id, isGroup } = values;
     try {
+      // Build a stable direct-message conversation id for two users
+      const state = getState();
+      const me = state?.user?.user || {};
+      const myId = me?.id || me?._id;
+      const otherId = receiver_id;
+      const stableConvoId = !isGroup && myId && otherId
+        ? (String(myId) < String(otherId)
+            ? `dm_${String(myId)}_${String(otherId)}`
+            : `dm_${String(otherId)}_${String(myId)}`)
+        : values.convo_id;
+
       const { data } = await api.post(CONVERSATION_ENDPOINT, {
         receiver_id,
         isGroup,
-        convo_id,
+        convo_id: stableConvoId,
       });
       // Ensure users array is present so UI can render names/pictures
-      const state = getState();
-      const me = state?.user?.user || {};
       const receiver = values?.receiver || null;
       if (!data.users || data.users.length === 0) {
         const meUser = {

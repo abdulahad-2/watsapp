@@ -5,6 +5,7 @@ import {
   getConversationId,
   getConversationName,
   getConversationPicture,
+  parseDirectConvo,
 } from "../../../utils/chat";
 import { dateHandler } from "../../../utils/date";
 import { capitalize } from "../../../utils/string";
@@ -20,7 +21,7 @@ function Conversation({ convo, socket, online, typing }) {
   // Normalize ids
   const myId = user?._id || user?.id || null;
   const pickId = (u) => (u ? u._id || u.id : null);
-  // For existing conversations, try to get receiver_id from the conversation itself
+  // For existing conversations, try to get receiver_id from users or dm_* id
   let receiver_id = null;
   if (convo.isGroup) {
     receiver_id = null;
@@ -42,7 +43,9 @@ function Conversation({ convo, socket, online, typing }) {
   }
   // If still missing and it's a 1:1 convo with empty users, use convo._id as receiver hint
   if (!convo.isGroup && !finalReceiverId && (!convo.users || convo.users.length === 0)) {
-    finalReceiverId = convo._id;
+    // Try to parse deterministic dm_* id first
+    const parsed = parseDirectConvo(convo._id, myId);
+    finalReceiverId = parsed?.otherId || convo._id;
   }
 
   const values = {

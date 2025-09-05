@@ -38,6 +38,7 @@ function Home({ socket }) {
   const myVideo = useRef();
   const userVideo = useRef();
   const connectionRef = useRef();
+  const joinedRoomsRef = useRef(new Set());
   //typing
   const [typing, setTyping] = useState(false);
   //join user into the socket io
@@ -185,8 +186,11 @@ function Home({ socket }) {
     if (!Array.isArray(conversations)) return;
     const ids = conversations.map((c) => c?._id).filter(Boolean);
     ids.forEach((id) => {
-      console.log("Joining room:", id);
-      socket.emit("join conversation", id);
+      if (!joinedRoomsRef.current.has(id)) {
+        joinedRoomsRef.current.add(id);
+        console.log("Joining room:", id);
+        socket.emit("join conversation", id);
+      }
     });
   }, [conversations, socket]);
   useEffect(() => {

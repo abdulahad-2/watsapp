@@ -34,3 +34,21 @@ export const checkOnlineStatus = (onlineUsers, user, users) => {
   const check = onlineUsers.find((u) => u.userId === convoId);
   return !!check;
 };
+
+// Deterministic DM room id helpers (so both users share the same room id)
+export const buildDirectConvoId = (userIdA, userIdB) => {
+  if (!userIdA || !userIdB) return null;
+  const a = String(userIdA);
+  const b = String(userIdB);
+  return a < b ? `dm_${a}_${b}` : `dm_${b}_${a}`;
+};
+
+export const parseDirectConvo = (convoId, myId) => {
+  if (!convoId || typeof convoId !== "string") return null;
+  if (!convoId.startsWith("dm_")) return null;
+  const parts = convoId.slice(3).split("_");
+  if (parts.length < 2) return null;
+  const [id1, id2] = parts;
+  const other = String(myId) === String(id1) ? id2 : id1;
+  return { id1, id2, otherId: other };
+};
