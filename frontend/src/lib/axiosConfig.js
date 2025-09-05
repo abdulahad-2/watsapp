@@ -1,9 +1,15 @@
 import axios from "axios";
 import { getToken, dispatch } from "./storeAccess";
 
+// Resolve API base URL with Vite/CRA and production fallback
+const viteApi = typeof import.meta !== "undefined" && import.meta?.env?.VITE_API_ENDPOINT;
+const craApi = process.env.REACT_APP_API_ENDPOINT;
+const prodFallback = "https://watsapp-backend-mscv.onrender.com"; // Render backend
+const resolvedBaseURL = viteApi || craApi || prodFallback;
+
 // Create an axios instance with custom config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_ENDPOINT || window.location.origin,
+  baseURL: resolvedBaseURL,
   headers: {
     "Content-Type": "application/json",
   },

@@ -100,17 +100,35 @@ export const getConversationMessages = createAsyncThunk(
 );
 export const sendMessage = createAsyncThunk(
   "message/send",
-  async (values, { rejectWithValue }) => {
+  async (values, { getState, rejectWithValue }) => {
     const { message, convo_id, files } = values;
     try {
+      const state = getState();
+      const me = state?.user?.user || {};
+      const myId = me?.id || me?._id;
+      const active = state?.chat?.activeConversation || {};
+      const users = Array.isArray(active?.users) ? active.users : [];
+      // Compute stable DM id if possible
+      let finalConvoId = convo_id;
+      if (!active?.isGroup && users.length && myId && typeof convo_id === 'string' && !convo_id.startsWith('dm_')) {
+        const ids = users.map(u => u?._id || u?.id).filter(Boolean);
+        const otherId = ids.find(id => String(id) !== String(myId));
+        if (otherId) {
+          finalConvoId = String(myId) < String(otherId)
+            ? `dm_${String(myId)}_${String(otherId)}`
+            : `dm_${String(otherId)}_${String(myId)}`;
+        }
+      }
       const { data } = await api.post(MESSAGE_ENDPOINT, {
         message,
-        convo_id,
+        convo_id: finalConvoId,
         files,
+        users,
+        sender: { _id: myId },
       });
       return data;
     } catch (error) {
-      return rejectWithValue(error.response.data.error.message);
+      return rejectWithValue(error.response?.data?.error?.message || error.message);
     }
   }
 );
