@@ -159,18 +159,20 @@ export const chatSlice = createSlice({
       state.activeConversation = action.payload;
     },
     updateMessagesAndConversations: (state, action) => {
-      //update messages
+      // Dedupe by _id to avoid duplicates when sender receives own socket event
+      const incoming = action.payload;
+      const exists = state.messages.some((m) => m._id === incoming._id);
       let convo = state.activeConversation;
-      if (convo._id === action.payload.conversation._id) {
-        state.messages = [...state.messages, action.payload];
+      if (convo._id === incoming.conversation._id && !exists) {
+        state.messages = [...state.messages, incoming];
       }
       //update conversations
-      const existing = state.conversations.find(c => c._id === action.payload.conversation._id);
+      const existing = state.conversations.find(c => c._id === incoming.conversation._id);
       let conversation = {
         ...existing,
-        ...action.payload.conversation,
-        users: (existing && existing.users && existing.users.length) ? existing.users : (state.activeConversation._id === action.payload.conversation._id ? state.activeConversation.users : action.payload.conversation.users),
-        latestMessage: action.payload,
+        ...incoming.conversation,
+        users: (existing && existing.users && existing.users.length) ? existing.users : (state.activeConversation._id === incoming.conversation._id ? state.activeConversation.users : incoming.conversation.users),
+        latestMessage: incoming,
       };
       let newConvos = [...state.conversations].filter(
         (c) => c._id !== conversation._id
@@ -339,6 +341,7 @@ export const {
   clearFiles,
   removeFileFromFiles,
   removeMessage,
+  patchConversationUsers,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

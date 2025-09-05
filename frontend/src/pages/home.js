@@ -26,7 +26,7 @@ const callData = {
 function Home({ socket }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
-  const { activeConversation } = useSelector((state) => state.chat);
+  const { activeConversation, conversations } = useSelector((state) => state.chat);
   const [onlineUsers, setOnlineUsers] = useState([]);
   //call
   const [call, setCall] = useState(callData);
@@ -171,6 +171,15 @@ function Home({ socket }) {
       dispatch(getConversations(user.token));
     }
   }, [user, dispatch]);
+
+  // Join all conversation rooms so incoming messages arrive even if chat is not opened
+  useEffect(() => {
+    if (!Array.isArray(conversations)) return;
+    const ids = conversations.map((c) => c?._id).filter(Boolean);
+    ids.forEach((id) => {
+      socket.emit("join conversation", id);
+    });
+  }, [conversations, socket]);
   useEffect(() => {
     //lsitening to receiving a message
     socket.on("receive message", (message) => {
