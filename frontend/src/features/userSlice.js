@@ -8,9 +8,11 @@ const loadUserFromStorage = () => {
     console.log('Loading user from localStorage:', savedUser);
     if (savedUser) {
       const userData = JSON.parse(savedUser);
-      // Ensure we have all required fields
+      // Ensure we have all required fields and mirror _id
+      const id = userData.id || userData._id || "";
       return {
-        id: userData.id || userData._id || "",
+        id,
+        _id: userData._id || id,
         name: userData.name || "",
         email: userData.email || "",
         picture: userData.picture || "",
@@ -20,6 +22,7 @@ const loadUserFromStorage = () => {
     }
     return {
       id: "",
+      _id: "",
       name: "",
       email: "",
       picture: "",
@@ -60,9 +63,11 @@ export const registerUser = createAsyncThunk(
         throw new Error("No token received from server");
       }
 
+      const id = response.user.id || response.user._id || "";
       return {
         user: {
-          id: response.user.id || response.user._id || "",
+          id,
+          _id: response.user._id || id,
           name: response.user.name,
           email: response.user.email,
           picture: response.user.picture,

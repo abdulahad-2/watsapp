@@ -15,27 +15,28 @@ function Conversation({ convo, socket, online, typing }) {
   const { user } = useSelector((state) => state.user);
   const { activeConversation } = useSelector((state) => state.chat);
   const { token } = user;
+  // Normalize ids
+  const myId = user?._id || user?.id || null;
+  const pickId = (u) => (u ? u._id || u.id : null);
   // For existing conversations, try to get receiver_id from the conversation itself
-  // If users array is incomplete, we'll need to handle this differently
   let receiver_id = null;
   if (convo.isGroup) {
     receiver_id = null;
   } else if (convo.users && convo.users.length >= 2) {
     receiver_id = getConversationId(user, convo.users);
   } else if (convo.users && convo.users.length === 1) {
-    // If only 1 user in array, check if it's not the current user
     const otherUser = convo.users[0];
-    receiver_id = otherUser._id !== user._id ? otherUser._id : null;
+    const otherId = pickId(otherUser);
+    receiver_id = otherId && otherId !== myId ? otherId : null;
   } else {
-    // If no users or empty array, try to extract from conversation name/picture logic
-    // This might be a conversation that needs to be created
     receiver_id = null;
   }
 
   // Enhanced fallback logic for receiver_id
   let finalReceiverId = receiver_id;
-  if (!finalReceiverId && convo.users) {
-    finalReceiverId = convo.users.find(u => u._id !== user._id)?._id;
+  if (!finalReceiverId && convo.users && myId) {
+    const other = convo.users.find((u) => pickId(u) && pickId(u) !== myId);
+    finalReceiverId = pickId(other);
   }
 
   const values = {
@@ -51,7 +52,8 @@ function Conversation({ convo, socket, online, typing }) {
     // Skip if conversation has incomplete data
     if (!convo.isGroup && convo.users && convo.users.length === 1) {
       const singleUser = convo.users[0];
-      if (singleUser._id === user._id) {
+      const singleId = pickId(singleUser);
+      if (singleId && singleId === myId) {
         console.warn("Cannot open conversation - only current user present");
         return;
       }
