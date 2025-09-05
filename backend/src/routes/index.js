@@ -27,6 +27,7 @@ router.use("/conversation", conversationRoutes);
 
 // Message routes
 router.use("/messages", messageRoutes);
+router.use("/message", messageRoutes);
 
 // Community routes
 router.use("/communities", communityRoutes);

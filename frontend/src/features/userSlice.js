@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { auth } from "../services/auth.service";
+import api from "../lib/axiosConfig";
 
 // Load user from localStorage if available
 const loadUserFromStorage = () => {
@@ -33,6 +34,7 @@ const loadUserFromStorage = () => {
     console.error('Error loading user from localStorage:', error);
     return {
       id: "",
+      _id: "",
       name: "",
       email: "",
       picture: "",
@@ -92,9 +94,11 @@ export const loginUser = createAsyncThunk(
         throw new Error("No token received from server");
       }
 
+      const id = response.user.id || response.user._id || "";
       return {
         user: {
-          id: response.user.id || response.user._id || "",
+          id,
+          _id: response.user._id || id,
           name: response.user.name,
           email: response.user.email,
           picture: response.user.picture,
@@ -104,6 +108,40 @@ export const loginUser = createAsyncThunk(
       };
     } catch (error) {
       return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Persist profile to backend so changes survive login
+export const saveProfile = createAsyncThunk(
+  "user/save_profile",
+  async (values, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      const current = state.user?.user || {};
+      const payload = {
+        email: current.email,
+        name: values.name ?? current.name,
+        picture: values.picture ?? current.picture,
+        status: values.status ?? current.status,
+      };
+      const { data } = await api.put("/users/profile", payload);
+      // Backend returns { message, user }
+      const updated = data?.user || payload;
+      const id = current.id || current._id || updated._id || updated.id || "";
+      return {
+        user: {
+          id,
+          _id: current._id || id,
+          name: updated.name,
+          email: current.email,
+          picture: updated.picture,
+          status: updated.status,
+          token: current.token,
+        },
+      };
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.error || error.message);
     }
   }
 );
@@ -201,10 +239,23 @@ export const userSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+      .addCase(saveProfile.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(saveProfile.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.user = action.payload.user;
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
+      })
+      .addCase(saveProfile.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });
 
 export const { logout, changeStatus, setUser, updateUserProfile } = userSlice.actions;
+export { saveProfile };
 
 export default userSlice.reducer;
