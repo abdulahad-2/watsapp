@@ -38,7 +38,7 @@ export const getConversations = createAsyncThunk(
 );
 export const open_create_conversation = createAsyncThunk(
   "conervsation/open_create",
-  async (values, { rejectWithValue }) => {
+  async (values, { getState, rejectWithValue }) => {
     const { receiver_id, isGroup, convo_id } = values;
     try {
       const { data } = await api.post(CONVERSATION_ENDPOINT, {
@@ -46,6 +46,31 @@ export const open_create_conversation = createAsyncThunk(
         isGroup,
         convo_id,
       });
+      // Ensure users array is present so UI can render names/pictures
+      const state = getState();
+      const me = state?.user?.user || {};
+      const receiver = values?.receiver || null;
+      if (!data.users || data.users.length === 0) {
+        const meUser = {
+          _id: me._id || me.id,
+          id: me.id || me._id,
+          name: me.name,
+          email: me.email,
+          picture: me.picture,
+          status: me.status,
+        };
+        const otherUser = receiver
+          ? {
+              _id: receiver._id || receiver.id,
+              id: receiver.id || receiver._id,
+              name: receiver.name,
+              email: receiver.email,
+              picture: receiver.picture,
+              status: receiver.status,
+            }
+          : { _id: receiver_id, id: receiver_id };
+        data.users = [meUser, otherUser];
+      }
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.error.message);
@@ -140,8 +165,11 @@ export const chatSlice = createSlice({
         state.messages = [...state.messages, action.payload];
       }
       //update conversations
+      const existing = state.conversations.find(c => c._id === action.payload.conversation._id);
       let conversation = {
+        ...existing,
         ...action.payload.conversation,
+        users: (existing && existing.users && existing.users.length) ? existing.users : (state.activeConversation._id === action.payload.conversation._id ? state.activeConversation.users : action.payload.conversation.users),
         latestMessage: action.payload,
       };
       let newConvos = [...state.conversations].filter(
@@ -233,8 +261,14 @@ export const chatSlice = createSlice({
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.messages = [...state.messages, action.payload];
+        // Preserve users from existing conversation or activeConversation to avoid 'Unknown'
+        const existing = state.conversations.find(c => c._id === action.payload.conversation._id) || {};
         let conversation = {
+          ...existing,
           ...action.payload.conversation,
+          users: (existing.users && existing.users.length)
+            ? existing.users
+            : (state.activeConversation._id === action.payload.conversation._id ? state.activeConversation.users : action.payload.conversation.users),
           latestMessage: action.payload,
         };
         let newConvos = [...state.conversations].filter(

@@ -9,6 +9,7 @@ function Contact({ contact, setSearchResults, socket }) {
   const { token } = user;
   const values = {
     receiver_id: contact._id,
+    receiver: contact,
     token,
   };
   const openConversation = async () => {
