@@ -9,6 +9,7 @@ import {
 import { dateHandler } from "../../../utils/date";
 import { capitalize } from "../../../utils/string";
 import React from 'react';
+import { toast } from "../../../utils/toast";
 
 function Conversation({ convo, socket, online, typing }) {
   const dispatch = useDispatch();
@@ -62,13 +63,16 @@ function Conversation({ convo, socket, online, typing }) {
     try {
       console.log("Opening conversation with values:", values);
       let newConvo = await dispatch(open_create_conversation(values));
-      if (newConvo.payload && newConvo.payload._id) {
-        socket.emit("join conversation", newConvo.payload._id);
+      const opened = newConvo?.payload?.conversation || newConvo?.payload;
+      if (opened && opened._id) {
+        socket.emit("join conversation", opened._id);
       } else {
-        console.error("Failed to open conversation - no payload:", newConvo);
+        console.error("Failed to open conversation - invalid payload:", newConvo);
+        toast("Could not open conversation", { type: "error" });
       }
     } catch (error) {
       console.error("Failed to open conversation:", error);
+      toast("Failed to open conversation", { type: "error" });
     }
   };
   return (
