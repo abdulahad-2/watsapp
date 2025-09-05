@@ -5,8 +5,10 @@ const router = express.Router();
 
 // Optional Supabase client (when envs are present)
 let supabase = null;
+let supabaseAdmin = null;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (SUPABASE_URL && SUPABASE_KEY) {
   try {
     supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -14,6 +16,15 @@ if (SUPABASE_URL && SUPABASE_KEY) {
   } catch (e) {
     console.warn("⚠️ Failed to init Supabase client:", e?.message || e);
     supabase = null;
+  }
+}
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+  try {
+    supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    console.log("✅ Supabase admin client initialized for ID lookup");
+  } catch (e) {
+    console.warn("⚠️ Failed to init Supabase admin client:", e?.message || e);
+    supabaseAdmin = null;
   }
 }
 
@@ -78,6 +89,21 @@ router.get("/search", async (req, res) => {
           .single();
 
         if (error && error.code !== "PGRST116") throw error; // not found vs other errors
+        if (!data && supabaseAdmin) {
+          // Try Supabase Auth (admin) by ID
+          const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.getUserById(search.trim());
+          if (!authErr && authData?.user) {
+            const u = authData.user;
+            const mapped = {
+              _id: u.id,
+              name: u.user_metadata?.name || u.email?.split("@")[0],
+              email: u.email,
+              picture: u.user_metadata?.picture,
+              status: u.user_metadata?.status || "Hey there! I am using WhatsApp.",
+            };
+            return res.json([mapped]);
+          }
+        }
         if (!data) return res.json([]);
 
         const user = {
@@ -146,6 +172,20 @@ router.get("/by-id/:id", async (req, res) => {
         .single();
 
       if (error && error.code !== "PGRST116") throw error; // treat not found as empty
+      if (!data && supabaseAdmin) {
+        const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.getUserById(id);
+        if (!authErr && authData?.user) {
+          const u = authData.user;
+          const mapped = {
+            _id: u.id,
+            name: u.user_metadata?.name || u.email?.split("@")[0],
+            email: u.email,
+            picture: u.user_metadata?.picture,
+            status: u.user_metadata?.status || "Hey there! I am using WhatsApp.",
+          };
+          return res.json([mapped]);
+        }
+      }
       if (!data) return res.json([]);
 
       const user = {
